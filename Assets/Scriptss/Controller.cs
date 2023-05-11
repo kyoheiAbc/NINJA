@@ -4,31 +4,25 @@ public class Controller
 {
     int button;
     Vector3 stick;
-    Vector2 a, b, c;
+    readonly Vector2 a, b;
     Vector2 v;
-    int w;
+    readonly int w;
     public Controller()
     {
         this.w = Screen.width;
 
         Image i;
         i = GameObject.Find("A").GetComponent<Image>();
-        i.rectTransform.position = new Vector2(this.w * 0.8f, this.w * 0.05f);
-        i.rectTransform.sizeDelta = new Vector2(this.w * 0.09f, this.w * 0.09f);
+        i.rectTransform.position = new Vector2(this.w * 0.95f, this.w * 0.05f);
+        i.rectTransform.sizeDelta = new Vector2(this.w * 0.1f, this.w * 0.1f);
         i.color = Color.HSVToRGB(240f / 360f, 0.5f, 1f);
         this.a = i.rectTransform.position;
 
         i = GameObject.Find("B").GetComponent<Image>();
-        i.rectTransform.position = new Vector2(this.w * 0.9f, this.w * 0.05f);
-        i.rectTransform.sizeDelta = new Vector2(this.w * 0.09f, this.w * 0.09f);
+        i.rectTransform.position = new Vector2(this.w * 0.85f, this.w * 0.05f);
+        i.rectTransform.sizeDelta = new Vector2(this.w * 0.1f, this.w * 0.1f);
         i.color = Color.HSVToRGB(120f / 360f, 0.5f, 1f);
         this.b = i.rectTransform.position;
-
-        i = GameObject.Find("C").GetComponent<Image>();
-        i.rectTransform.position = new Vector2(this.w * 0.9f, this.w * 0.15f);
-        i.rectTransform.sizeDelta = new Vector2(this.w * 0.09f, this.w * 0.09f);
-        i.color = Color.HSVToRGB(60f / 360f, 0.5f, 1f);
-        this.c = i.rectTransform.position;
 
         this.v = Vector2.zero;
     }
@@ -48,7 +42,6 @@ public class Controller
 
                 if ((t.position - this.b).sqrMagnitude < (this.w * 0.05) * (this.w * 0.05)) this.button = 2;
 
-                if ((t.position - this.c).sqrMagnitude < (this.w * 0.05) * (this.w * 0.05)) this.button = 3;
             }
             if (i == 0)
             {
@@ -56,17 +49,10 @@ public class Controller
                 if (v.sqrMagnitude > (this.w * 0.025) * (this.w * 0.025)) this.stick = new Vector3(v.x, 0, v.y);
             }
         }
-        if (Input.GetKey(KeyCode.Z)) this.button = 1;
-        if (Input.GetKey(KeyCode.X)) this.button = 2;
-        if (Input.GetKey(KeyCode.C)) this.button = 3;
+        if (Input.GetKey(KeyCode.X)) this.button = 1;
+        if (Input.GetKey(KeyCode.Z)) this.button = 2;
+    }
 
-    }
-    public Vector3 getStick()
-    {
-        return this.stick;
-    }
-    public int getButton()
-    {
-        return this.button;
-    }
+    public Vector3 getStick() { return this.stick; }
+    public int getButton() { return this.button; }
 }
