@@ -25,26 +25,22 @@ public class Main : MonoBehaviour
         this.newNinja(1);
         this.newNinja(1);
 
-
         this.player = this.list[0];
     }
 
     void Update()
     {
-
         this.controller.update();
 
         this.player.mv(this.controller.getStick().normalized * 0.1f);
 
         switch (this.controller.getButton())
         {
-            case 1:
+            case 0b_01:
+                this.player.attackExe();
+                break;
+            case 0b_10:
                 this.player.jump(this.controller.getStick().normalized);
-                break;
-            case 2:
-                this.player.attack.exe();
-                break;
-            case 3:
                 break;
         }
 
@@ -75,20 +71,20 @@ public class Main : MonoBehaviour
 
     public List<Ninja> getList(Ninja n, float d, float a)
     {
-        List<Ninja> r = new List<Ninja>();
+        List<Ninja> ret = new List<Ninja>();
         for (int i = 0; i < this.list.Count; i++)
         {
             if (this.list[i] == n) continue;
             if ((this.list[i].getPos() - n.getPos()).sqrMagnitude > d) continue;
             if (Vector3.Angle(n.forward(), this.list[i].getPos() - n.getPos()) > a) continue;
-            r.Add(this.list[i]);
+            ret.Add(this.list[i]);
         }
-        return r;
+        return ret;
     }
 
     public Ninja nearestNinja(Ninja n)
     {
-        Ninja r = null;
+        Ninja ret = null;
         float min = float.MaxValue;
         for (int i = 0; i < this.list.Count; i++)
         {
@@ -96,10 +92,10 @@ public class Main : MonoBehaviour
             if ((this.list[i].getPos() - n.getPos()).sqrMagnitude < min)
             {
                 min = (this.list[i].getPos() - n.getPos()).sqrMagnitude;
-                r = this.list[i];
+                ret = this.list[i];
             }
         }
-        return r;
+        return ret;
     }
 
 }

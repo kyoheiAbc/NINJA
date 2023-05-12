@@ -61,12 +61,12 @@ public class Renderer
 
         // Attack
         {
-            if (this.ninja.attack.combo > 0)
+            if (this.ninja.getAttackCombo() > 0)
             {
-                float f = (this.ninja.attack.inc - 1) / 4f;
+                float f = (this.ninja.getAttackInc() - 1) / 4f;
                 f = Mathf.Clamp(f, 0, 1);
-                if (this.ninja.attack.combo == 2) this.transform[3].localRotation = this.attack[this.ninja.attack.combo - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(0, 0, 1));
-                else this.transform[3].localRotation = this.attack[this.ninja.attack.combo - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(1, 0, 0));
+                if (this.ninja.getAttackCombo() == 2) this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(0, 0, 1));
+                else this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(1, 0, 0));
             }
         }
     }

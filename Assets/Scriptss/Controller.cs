@@ -3,56 +3,38 @@ using UnityEngine.UI;
 public class Controller
 {
     int button;
-    Vector3 stick;
-    readonly Vector2 a, b;
-    Vector2 v;
-    readonly int w;
+    Vector2[] stick;
     public Controller()
     {
-        this.w = Screen.width;
-
-        Image i;
-        i = GameObject.Find("A").GetComponent<Image>();
-        i.rectTransform.position = new Vector2(this.w * 0.95f, this.w * 0.05f);
-        i.rectTransform.sizeDelta = new Vector2(this.w * 0.1f, this.w * 0.1f);
-        i.color = Color.HSVToRGB(240f / 360f, 0.5f, 1f);
-        this.a = i.rectTransform.position;
-
-        i = GameObject.Find("B").GetComponent<Image>();
-        i.rectTransform.position = new Vector2(this.w * 0.85f, this.w * 0.05f);
-        i.rectTransform.sizeDelta = new Vector2(this.w * 0.1f, this.w * 0.1f);
-        i.color = Color.HSVToRGB(120f / 360f, 0.5f, 1f);
-        this.b = i.rectTransform.position;
-
-        this.v = Vector2.zero;
+        for (int i = 0; i < 2; i++)
+        {
+            Image image = GameObject.Find("A").GetComponent<Image>();
+            if (i == 1) image = GameObject.Find("B").GetComponent<Image>();
+            image.rectTransform.position = new Vector2((0.1f * i + 0.85f) * Screen.width, 0.05f * Screen.width);
+            image.rectTransform.sizeDelta = new Vector2(0.1f * Screen.width, 0.1f * Screen.width);
+            image.color = Color.HSVToRGB((i + 1) / 3f, 0.5f, 1f);
+        }
+        this.stick = new Vector2[2];
     }
     public void update()
     {
         this.button = 0;
-        this.stick = Vector3.zero;
-
         for (int i = 0; i < Input.touchCount; i++)
         {
             Touch t = Input.GetTouch(i);
-            if (t.phase == TouchPhase.Began)
-            {
-                if (i == 0) this.v = t.position;
-
-                if ((t.position - this.a).sqrMagnitude < (this.w * 0.05) * (this.w * 0.05)) this.button = 1;
-
-                if ((t.position - this.b).sqrMagnitude < (this.w * 0.05) * (this.w * 0.05)) this.button = 2;
-
-            }
-            if (i == 0)
-            {
-                Vector2 v = t.position - this.v;
-                if (v.sqrMagnitude > (this.w * 0.025) * (this.w * 0.025)) this.stick = new Vector3(v.x, 0, v.y);
-            }
+            if (t.phase != TouchPhase.Began) break;
+            if ((t.position - (Vector2)GameObject.Find("A").transform.position).sqrMagnitude < (Screen.width * 0.05) * (Screen.width * 0.05)) this.button += 0b_01;
+            if ((t.position - (Vector2)GameObject.Find("B").transform.position).sqrMagnitude < (Screen.width * 0.05) * (Screen.width * 0.05)) this.button += 0b_10;
         }
-        if (Input.GetKey(KeyCode.X)) this.button = 1;
-        if (Input.GetKey(KeyCode.Z)) this.button = 2;
+        this.stick[1] = Vector2.zero;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            Touch t = Input.GetTouch(i);
+            if (t.position.x > 0.5f * Screen.width) break;
+            if (t.phase == TouchPhase.Began) this.stick[0] = t.position;
+            this.stick[1] = t.position - this.stick[0];
+        }
     }
-
-    public Vector3 getStick() { return this.stick; }
     public int getButton() { return this.button; }
+    public Vector3 getStick() { return new Vector3(this.stick[1].x, 0, this.stick[1].y); }
 }
