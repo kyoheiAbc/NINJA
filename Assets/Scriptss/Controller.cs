@@ -34,9 +34,12 @@ public class Controller
             if (t.phase == TouchPhase.Began) this.stick[0] = t.position;
             this.stick[1] = t.position - this.stick[0];
         }
-        if (Input.GetKeyDown(KeyCode.Z)) this.button = 0b_01;
-        if (Input.GetKeyDown(KeyCode.X)) this.button = 0b_10;
-        if (Input.GetKeyDown(KeyCode.C)) this.button = 0b_11;
+        // Debug
+        {
+            if (Input.GetKeyDown(KeyCode.Z)) this.button = 0b_01;
+            if (Input.GetKeyDown(KeyCode.X)) this.button = 0b_10;
+            if (Input.GetKeyDown(KeyCode.R)) this.button = 0b_100;
+        }
     }
     public int getButton() { return this.button; }
     public Vector3 getStick() { return new Vector3(this.stick[1].x, 0, this.stick[1].y); }

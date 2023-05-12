@@ -83,12 +83,16 @@ public class Renderer
             }
         }
 
-        if (this.ninja.getHp() < 0)
+
+        // Death
         {
-            if (this.ninja.getDamage() == 0)
+            if (this.ninja.getHp() < 0)
             {
-                Main.instance.destroy(this.gameObject);
-                return;
+                if (this.ninja.getDamage() == 0)
+                {
+                    Main.instance.destroy(this.gameObject);
+                    return;
+                }
             }
         }
     }

@@ -21,14 +21,22 @@ public class Main : MonoBehaviour
         this.list = new List<Ninja>();
         this.rList = new List<Renderer>();
 
-        this.newNinja(0);
-        this.newNinja(1);
-        this.newNinja(1);
-        this.newNinja(1);
+        this.reset();
 
+    }
+    public void reset()
+    {
+        this.frame = 0;
+
+        this.list.Clear();
+
+        for (int i = 0; i < this.rList.Count; i++) if (this.rList[i].getGameObject() != null) Destroy(this.rList[i].getGameObject());
+        this.rList.Clear();
+
+        this.newNinja(0);
         this.player = this.list[0];
 
-        this.frame = 0;
+        for (int i = 0; i < 7; i++) this.newNinja(1);
     }
 
     void Update()
@@ -49,6 +57,9 @@ public class Main : MonoBehaviour
                     break;
                 case 0b_10:
                     this.player.jump(this.controller.getStick().normalized);
+                    break;
+                case 0b_100:
+                    this.reset();
                     break;
             }
         }
