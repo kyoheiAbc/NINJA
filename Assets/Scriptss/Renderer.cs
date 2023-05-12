@@ -32,6 +32,13 @@ public class Renderer
 
     public void update()
     {
+        this.gameObject.SetActive(true);
+        for (int i = 0; i < 5; i++)
+        {
+            this.transform[i].localRotation = Quaternion.identity;
+        }
+
+        float frame = (Main.instance.getFrame() % 30) / 30f;
 
         Vector3 past = this.transform[0].position;
 
@@ -41,23 +48,29 @@ public class Renderer
             this.transform[0].localRotation = this.ninja.getRot();
         }
 
-
-        if (this.ninja.getPos() == past)
+        // walk
+        walkFunc();
+        void walkFunc()
         {
-            this.transform[1].localRotation = Quaternion.identity;
-            this.transform[2].localRotation = Quaternion.identity;
-            this.transform[3].localRotation = Quaternion.identity;
-            this.transform[4].localRotation = Quaternion.identity;
-        }
-        else
-        {
-
-            float sin = Mathf.Sin(2 * Mathf.PI * (Time.time + this.ninja.getRandom())) * 0.5f + 0.5f;
+            if (this.ninja.getDamage() > 0) return;
+            if (this.ninja.getHp() < 0) return;
+            if (this.ninja.getPos() == past) return;
+            float sin = Mathf.Sin(2 * Mathf.PI * (frame + this.ninja.getRandom())) * 0.5f + 0.5f;
             this.transform[1].localRotation = Quaternion.Lerp(this.walk[0], this.walk[1], sin);
             this.transform[2].localRotation = Quaternion.Lerp(this.walk[1], this.walk[0], sin);
             this.transform[3].localRotation = Quaternion.Lerp(this.walk[1], this.walk[0], sin);
             this.transform[4].localRotation = Quaternion.Lerp(this.walk[0], this.walk[1], sin);
         }
+
+
+        // Damage
+        {
+            if (this.ninja.getDamage() > 0)
+            {
+                this.gameObject.SetActive(Mathf.Sin(16 * Mathf.PI * (frame + this.ninja.getRandom())) > 0);
+            }
+        }
+
 
         // Attack
         {
@@ -69,6 +82,22 @@ public class Renderer
                 else this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(1, 0, 0));
             }
         }
+
+        if (this.ninja.getHp() < 0)
+        {
+            if (this.ninja.getDamage() == 0)
+            {
+                Main.instance.destroy(this.gameObject);
+                return;
+            }
+        }
+    }
+
+
+
+    public GameObject getGameObject()
+    {
+        return this.gameObject;
     }
 
 

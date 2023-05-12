@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Ninja
 {
+    Ai ai;
+    Attack attack;
     Vector3 pos;
     Quaternion rot;
     Vector3 vec;
-    Ai ai;
-    Attack attack;
     int type;
+    int damage;
     float random;
+    int hp;
 
     public Ninja(int i)
     {
@@ -18,11 +20,13 @@ public class Ninja
         this.random = Random.Range(-1f, 1f);
         this.type = i;
         this.attack = new Attack(this);
+        this.damage = 0;
+        this.hp = 8;
+        if (this.type == 0) this.hp = int.MaxValue;
         if (this.type != 0) this.ai = new Ai(this);
     }
     public void update()
     {
-
         // Physics
         {
             List<Ninja> l = Main.instance.getList(this, 1, 180);
@@ -50,15 +54,19 @@ public class Ninja
             }
         }
 
+        // Ai
+        {
+            if (this.ai != null) this.ai.update();
+        }
+
         // Attack
         {
             this.attack.update();
         }
 
-
-        // Ai
+        // Damage
         {
-            if (this.ai != null) this.ai.update();
+            if (this.damage > 0) this.damage--;
         }
 
 
@@ -121,6 +129,27 @@ public class Ninja
     {
         return this.attack.getInc();
     }
+    public int getDamage() { return this.damage; }
+    public void setDamage(Ninja n, int d)
+    {
+        if (this.damage != 0) return;
+        if (this.hp < 0) return;
+        this.hp -= d;
+        this.damage = 10;
+        if (this.hp < 0) this.damage *= 3;
+        this.attack.stop();
+        if (this.ai == null) return;
+
+        this.ai.attackFlowStop();
+        this.ai.setTarget(n);
+    }
+
+    public int getHp()
+    {
+        return this.hp;
+    }
+
+
 }
 
 public class Attack
@@ -148,6 +177,11 @@ public class Attack
         this.combo++;
         this.inc = 0;
     }
+    public void stop()
+    {
+        this.combo = 0;
+        this.inc = 0;
+    }
     public void update()
     {
         if (this.combo == 0) return;
@@ -160,6 +194,7 @@ public class Attack
             for (int i = 0; i < l.Count; i++)
             {
                 l[i].addVec(this.ninja.forward().normalized * 0.3f * this.combo);
+                l[i].setDamage(this.ninja, this.combo);
             }
         }
 

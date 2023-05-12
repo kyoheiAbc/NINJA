@@ -7,6 +7,7 @@ public class Main : MonoBehaviour
     Controller controller;
     List<Ninja> list;
     List<Renderer> rList;
+    int frame;
 
     void Awake()
     {
@@ -26,33 +27,57 @@ public class Main : MonoBehaviour
         this.newNinja(1);
 
         this.player = this.list[0];
+
+        this.frame = 0;
     }
 
     void Update()
     {
+        this.frame++;
+        if (this.frame == 300) this.frame = 0;
+
         this.controller.update();
 
-        this.player.mv(this.controller.getStick().normalized * 0.1f);
-
-        switch (this.controller.getButton())
+        if (this.player.getDamage() == 0)
         {
-            case 0b_01:
-                this.player.attackExe();
-                break;
-            case 0b_10:
-                this.player.jump(this.controller.getStick().normalized);
-                break;
+            this.player.mv(this.controller.getStick().normalized * 0.1f);
+
+            switch (this.controller.getButton())
+            {
+                case 0b_01:
+                    this.player.attackExe();
+                    break;
+                case 0b_10:
+                    this.player.jump(this.controller.getStick().normalized);
+                    break;
+            }
         }
 
         for (int i = 0; i < this.list.Count; i++)
         {
             this.list[i].update();
+            if (this.list[i].getHp() < 0 && this.list[i].getDamage() == 0)
+            {
+                this.list.RemoveAt(i);
+                i--;
+                continue;
+            }
         }
 
         for (int i = 0; i < this.rList.Count; i++)
         {
+            if (this.rList[i].getGameObject() == null)
+            {
+                this.rList.RemoveAt(i);
+                i--;
+                continue;
+            }
             this.rList[i].update();
         }
+    }
+    public void destroy(GameObject g)
+    {
+        Destroy(g);
     }
     private void newNinja(int i)
     {
@@ -96,6 +121,10 @@ public class Main : MonoBehaviour
             }
         }
         return ret;
+    }
+    public int getFrame()
+    {
+        return this.frame;
     }
 
 }

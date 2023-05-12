@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 public class Ai
 {
@@ -15,6 +14,9 @@ public class Ai
     }
     public void update()
     {
+
+        if (this.ninja.getDamage() > 0) return;
+
         Vector3 v = this.target.getPos() - this.ninja.getPos();
         v.y = 0;
         this.ninja.setRot(Quaternion.LookRotation(v));
@@ -32,7 +34,7 @@ public class Ai
         {
             if (v.sqrMagnitude < 1.5 * 1.5) this.attackFlow.start(Random.Range(0, 2) == 0);
 
-            if (Random.Range(0, 90) == 0) this.attackFlow.start(false);
+            if (Random.Range(0, 45) == 0) this.attackFlow.start(false);
 
             this.attackFlow.update();
 
@@ -46,6 +48,18 @@ public class Ai
         }
 
         if (Random.Range(0, 90) == 0) this.sleep = Random.Range(30, 90);
+    }
+    public void attackFlowStop()
+    {
+        this.attackFlow.stop();
+    }
+    public void setTarget(Ninja n)
+    {
+        this.target = n;
+
+        Vector3 v = this.target.getPos() - this.ninja.getPos();
+        v.y = 0;
+        this.ninja.setRot(Quaternion.LookRotation(v));
     }
 }
 
@@ -77,6 +91,10 @@ public class AttackFlow
         this.jump = b;
         this.last = false;
         this.time = 0;
+    }
+    public void stop()
+    {
+        this.en = false;
     }
     public void update()
     {
