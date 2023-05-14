@@ -7,24 +7,24 @@ public class Ninja
     Vector3 pos;
     Quaternion rot;
     Vector3 vec;
-    int type;
     int damage;
     float random;
     int hp;
 
-    public Ninja(int i)
+    public Ninja()
     {
         this.pos = new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10));
         this.rot = Quaternion.identity;
         this.vec = Vector3.zero;
         this.random = Random.Range(-1f, 1f);
-        this.type = i;
         this.attack = new Attack(this);
         this.damage = 0;
         this.hp = 8;
-        if (this.type == 0) this.hp = int.MaxValue;
-        if (this.type != 0) this.ai = new Ai(this);
+        this.ai = new Ai(this);
     }
+
+    public void disableAi() { this.ai = null; }
+
     public void update()
     {
         // Physics
@@ -144,11 +144,18 @@ public class Ninja
         this.ai.setTarget(n);
     }
 
+    public void setHp(int i)
+    {
+        this.hp = i;
+    }
     public int getHp()
     {
         return this.hp;
     }
-
+    public Ai getAi()
+    {
+        return this.ai;
+    }
 
 }
 
@@ -169,7 +176,7 @@ public class Attack
         {
             case 1:
             case 2:
-                if (this.inc < 10) return;
+                if (this.inc < 5) return;
                 break;
             case 3:
                 return;
@@ -188,17 +195,25 @@ public class Attack
 
         this.inc++;
 
-        if (this.inc == 5)
+        if (this.inc == 3)
         {
             List<Ninja> l = Main.instance.getList(this.ninja, 2.5f * 2.5f, 45);
             for (int i = 0; i < l.Count; i++)
             {
                 l[i].addVec(this.ninja.forward().normalized * 0.3f * this.combo);
                 l[i].setDamage(this.ninja, this.combo);
+                if (this.ninja.getAi() == null)
+                {
+                    Main.instance.setStop(5);
+                }
+                else if (l[i].getAi() == null)
+                {
+                    Main.instance.setStop(5);
+                }
             }
         }
 
-        if (this.inc > 30)
+        if (this.inc > 20)
         {
             this.combo = 0;
             this.inc = 0;

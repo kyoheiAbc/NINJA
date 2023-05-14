@@ -27,7 +27,6 @@ public class Renderer
         this.attack[0] = Quaternion.Euler(180, 0, -45);
         this.attack[1] = Quaternion.Euler(90, 0, 90);
         this.attack[2] = Quaternion.Euler(180, 0, 0);
-
     }
 
     public void update()
@@ -55,7 +54,7 @@ public class Renderer
             if (this.ninja.getDamage() > 0) return;
             if (this.ninja.getHp() < 0) return;
             if (this.ninja.getPos() == past) return;
-            float sin = Mathf.Sin(2 * Mathf.PI * (frame + this.ninja.getRandom())) * 0.5f + 0.5f;
+            float sin = Mathf.Sin(2f * Mathf.PI * (frame + this.ninja.getRandom())) * 0.5f + 0.5f;
             this.transform[1].localRotation = Quaternion.Lerp(this.walk[0], this.walk[1], sin);
             this.transform[2].localRotation = Quaternion.Lerp(this.walk[1], this.walk[0], sin);
             this.transform[3].localRotation = Quaternion.Lerp(this.walk[1], this.walk[0], sin);
@@ -76,7 +75,7 @@ public class Renderer
         {
             if (this.ninja.getAttackCombo() > 0)
             {
-                float f = (this.ninja.getAttackInc() - 1) / 4f;
+                float f = this.ninja.getAttackInc() / (5f - 1f);
                 f = Mathf.Clamp(f, 0, 1);
                 if (this.ninja.getAttackCombo() == 2) this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(0, 0, 1));
                 else this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(1, 0, 0));

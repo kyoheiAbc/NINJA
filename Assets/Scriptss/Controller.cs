@@ -10,7 +10,7 @@ public class Controller
         {
             Image image = GameObject.Find("A").GetComponent<Image>();
             if (i == 1) image = GameObject.Find("B").GetComponent<Image>();
-            image.rectTransform.position = new Vector2((0.1f * i + 0.85f) * Screen.width, 0.05f * Screen.width);
+            image.rectTransform.position = new Vector2((0.15f * i + 0.75f) * Screen.width, 0.1f * Screen.width);
             image.rectTransform.sizeDelta = new Vector2(0.1f * Screen.width, 0.1f * Screen.width);
             image.color = Color.HSVToRGB((i + 1) / 3f, 0.5f, 1f);
         }
@@ -30,7 +30,7 @@ public class Controller
         for (int i = 0; i < Input.touchCount; i++)
         {
             Touch t = Input.GetTouch(i);
-            if (t.position.x > 0.5f * Screen.width) break;
+            if (t.position.x > 0.5f * Screen.width) continue;
             if (t.phase == TouchPhase.Began) this.stick[0] = t.position;
             this.stick[1] = t.position - this.stick[0];
         }
@@ -38,7 +38,6 @@ public class Controller
         {
             if (Input.GetKeyDown(KeyCode.Z)) this.button = 0b_01;
             if (Input.GetKeyDown(KeyCode.X)) this.button = 0b_10;
-            if (Input.GetKeyDown(KeyCode.R)) this.button = 0b_100;
         }
     }
     public int getButton() { return this.button; }
