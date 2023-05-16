@@ -10,6 +10,7 @@ public class Renderer
 
     public Renderer(Ninja n, GameObject g)
     {
+
         this.ninja = n;
         this.gameObject = g;
         this.transform = new Transform[5];
@@ -31,13 +32,16 @@ public class Renderer
 
     public void update()
     {
+
+        float frm = Main.instance.getFrame() / 240f;
+
+
         this.gameObject.SetActive(true);
         for (int i = 0; i < 5; i++)
         {
             this.transform[i].localRotation = Quaternion.identity;
         }
 
-        float frame = (Main.instance.getFrame() % 30) / 30f;
 
         Vector3 past = this.transform[0].position;
 
@@ -54,7 +58,7 @@ public class Renderer
             if (this.ninja.getDamage() > 0) return;
             if (this.ninja.getHp() < 0) return;
             if (this.ninja.getPos() == past) return;
-            float sin = Mathf.Sin(2f * Mathf.PI * (frame + this.ninja.getRandom())) * 0.5f + 0.5f;
+            float sin = Mathf.Sin(2f * Mathf.PI * (frm + this.ninja.getRandom())) * 0.5f + 0.5f;
             this.transform[1].localRotation = Quaternion.Lerp(this.walk[0], this.walk[1], sin);
             this.transform[2].localRotation = Quaternion.Lerp(this.walk[1], this.walk[0], sin);
             this.transform[3].localRotation = Quaternion.Lerp(this.walk[1], this.walk[0], sin);
@@ -66,19 +70,19 @@ public class Renderer
         {
             if (this.ninja.getDamage() > 0)
             {
-                this.gameObject.SetActive(Mathf.Sin(16 * Mathf.PI * (frame + this.ninja.getRandom())) > 0);
+                this.gameObject.SetActive(Mathf.Sin(16 * Mathf.PI * (frm + this.ninja.getRandom())) > 0);
             }
         }
 
 
         // Attack
         {
-            if (this.ninja.getAttackCombo() > 0)
+            if (this.ninja.attack.getCombo() > 0)
             {
-                float f = this.ninja.getAttackInc() / (5f - 1f);
+                float f = this.ninja.attack.getInc() / (5f - 1f);
                 f = Mathf.Clamp(f, 0, 1);
-                if (this.ninja.getAttackCombo() == 2) this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(0, 0, 1));
-                else this.transform[3].localRotation = this.attack[this.ninja.getAttackCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(1, 0, 0));
+                if (this.ninja.attack.getCombo() == 2) this.transform[3].localRotation = this.attack[this.ninja.attack.getCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(0, 0, 1));
+                else this.transform[3].localRotation = this.attack[this.ninja.attack.getCombo() - 1] * Quaternion.AngleAxis(-180 * f, new Vector3(1, 0, 0));
             }
         }
 

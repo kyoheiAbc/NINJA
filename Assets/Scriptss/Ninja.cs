@@ -2,14 +2,24 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Ninja
 {
-    Ai ai;
-    Attack attack;
-    Vector3 pos;
+    Ai ai; public Ai getAi() { return this.ai; }
+    public void setAi(Ai s) { this.ai = s; }
+
+
+    public Attack attack;
+    Vector3 pos; public Vector3 getPos() { return this.pos; }
+
     Quaternion rot;
+    public Quaternion getRot() { return this.rot; }
+    public void setRot(Quaternion s) { this.rot = s; }
+
+
     Vector3 vec;
-    int damage;
-    float random;
-    int hp;
+    int damage; public int getDamage() { return this.damage; }
+
+    float random; public float getRandom() { return this.random; }
+
+    int hp; public int getHp() { return this.hp; }
 
     public Ninja()
     {
@@ -23,7 +33,6 @@ public class Ninja
         this.ai = new Ai(this);
     }
 
-    public void disableAi() { this.ai = null; }
 
     public void update()
     {
@@ -36,8 +45,8 @@ public class Ninja
                 v.y = 0;
                 v = v.normalized;
                 if (v == Vector3.zero) v = new Vector3(Random.Range(-1, 2), 0, Random.Range(-1, 2));
-                this.addVec(v * -0.5f);
-                l[i].addVec(v * 0.5f);
+                this.addVec(v * -0.1f);
+                l[i].addVec(v * 0.1f);
             }
 
             this.pos += this.vec;
@@ -64,6 +73,8 @@ public class Ninja
             this.attack.update();
         }
 
+
+
         // Damage
         {
             if (this.damage > 0) this.damage--;
@@ -82,14 +93,8 @@ public class Ninja
         this.pos += v;
         if (v != Vector3.zero) this.rot = Quaternion.LookRotation(v);
     }
-    public Vector3 getPos()
-    {
-        return this.pos;
-    }
-    public Quaternion getRot()
-    {
-        return this.rot;
-    }
+
+
     public bool jump(Vector3 v)
     {
         if (pos.y != 0) return false;
@@ -102,87 +107,53 @@ public class Ninja
         this.vec += v;
     }
 
-    public Vector3 forward()
-    {
-        return (this.rot * Vector3.forward).normalized;
-    }
-    public void setRot(Quaternion q)
-    {
-        this.rot = q;
-    }
+    public Vector3 forward() { return (this.rot * Vector3.forward).normalized; }
 
-    public float getRandom()
-    {
-        return this.random;
-    }
 
-    public void attackExe()
-    {
-        this.attack.exe();
-    }
-    public int getAttackCombo()
-    {
-        return this.attack.getCombo();
-    }
-
-    public int getAttackInc()
-    {
-        return this.attack.getInc();
-    }
-    public int getDamage() { return this.damage; }
     public void setDamage(Ninja n, int d)
     {
         if (this.damage != 0) return;
         if (this.hp < 0) return;
+
+
         this.hp -= d;
         this.damage = 10;
         if (this.hp < 0) this.damage *= 3;
         this.attack.stop();
         if (this.ai == null) return;
 
-        this.ai.attackFlowStop();
-        this.ai.setTarget(n);
     }
 
-    public void setHp(int i)
-    {
-        this.hp = i;
-    }
-    public int getHp()
-    {
-        return this.hp;
-    }
-    public Ai getAi()
-    {
-        return this.ai;
-    }
+
+
 
 }
 
 public class Attack
 {
     Ninja ninja;
-    int combo;
-    int inc;
+    int combo; public int getCombo() { return this.combo; }
+    int inc; public int getInc() { return this.inc; }
     public Attack(Ninja n)
     {
         this.ninja = n;
         this.combo = 0;
         this.inc = 0;
     }
-    public void exe()
+    public bool exe()
     {
         switch (this.combo)
         {
             case 1:
             case 2:
-                if (this.inc < 5) return;
+                if (this.inc < 5) return false;
                 break;
             case 3:
-                return;
+                return false;
         }
         this.combo++;
         this.inc = 0;
+        return true;
     }
     public void stop()
     {
@@ -200,16 +171,12 @@ public class Attack
             List<Ninja> l = Main.instance.getList(this.ninja, 2.5f * 2.5f, 45);
             for (int i = 0; i < l.Count; i++)
             {
-                l[i].addVec(this.ninja.forward().normalized * 0.3f * this.combo);
+
                 l[i].setDamage(this.ninja, this.combo);
-                if (this.ninja.getAi() == null)
-                {
-                    Main.instance.setStop(5);
-                }
-                else if (l[i].getAi() == null)
-                {
-                    Main.instance.setStop(5);
-                }
+
+                l[i].addVec(this.ninja.forward().normalized * 0.3f * this.combo);
+
+
             }
         }
 
@@ -220,15 +187,7 @@ public class Attack
         }
 
     }
-    public int getCombo()
-    {
-        return this.combo;
-    }
 
-    public int getInc()
-    {
-        return this.inc;
-    }
 }
 
 

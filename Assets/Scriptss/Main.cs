@@ -6,10 +6,9 @@ public class Main : MonoBehaviour
     Controller controller;
     List<Ninja> list;
     List<Renderer> rList;
-    int frame;
+    int frame; public int getFrame() { return this.frame; }
     int stage;
     List<Texture> texture;
-    int stop;
     void Awake()
     {
         instance = this;
@@ -55,34 +54,28 @@ public class Main : MonoBehaviour
         for (int i = 0; i < this.rList.Count; i++) if (this.rList[i].getGameObject() != null) Destroy(this.rList[i].getGameObject());
         this.rList.Clear();
 
-        this.stop = 0;
         this.stage = 0;
 
         this.newNinja(4);
-        this.list[0].disableAi();
-        this.list[this.list.Count - 1].setHp(16);
+        this.list[0].setAi(null);
 
     }
 
     void Update()
     {
 
-        // Stop
-        if (this.stop > 0)
-        {
-            this.stop--;
-            return;
-        }
-
         // Frame
         {
-            this.frame++;
-            if (this.frame == 300) this.frame = 0;
+            this.frame += 8;
+            if (this.frame == 2400) this.frame = 0;
         }
+
+        this.controller.update();
+
 
         if (this.rList.Count <= 1) this.stage++;
         else if (this.list[0].getAi() != null) this.stage++;
-        if (this.stage % 100 == 90)
+        if (this.stage % 100 == 30)
         {
             if (this.rList.Count == 0) this.reset();
             else if (this.list[0].getAi() != null) this.reset();
@@ -92,7 +85,7 @@ public class Main : MonoBehaviour
                 {
                     case 0:
                         this.newNinja(0);
-                        this.newNinja(5);
+                        // this.newNinja(5);
                         break;
                     case 1:
                         this.newNinja(1);
@@ -105,12 +98,22 @@ public class Main : MonoBehaviour
                         break;
                     case 4:
                         this.newNinja(8);
-                        this.list[this.list.Count - 1].getAi().setLevel(1);
-                        this.list[this.list.Count - 1].setHp(16);
                         break;
                     case 5:
-                        this.reset();
+                        this.newNinja(0);
+                        this.newNinja(1);
+                        this.newNinja(2);
+                        this.newNinja(3);
+                        this.newNinja(4);
+                        this.newNinja(5);
+                        this.newNinja(6);
+                        this.newNinja(7);
+
+                        this.newNinja(8);
                         break;
+                    case 6:
+                        this.reset();
+                        return;
                 }
                 this.stage = 100 * (1 + this.stage / 100);
             }
@@ -119,7 +122,6 @@ public class Main : MonoBehaviour
 
         if (this.list.Count == 0) return;
 
-        this.controller.update();
 
         if (this.list[0].getDamage() == 0)
         {
@@ -128,7 +130,7 @@ public class Main : MonoBehaviour
             switch (this.controller.getButton())
             {
                 case 0b_01:
-                    this.list[0].attackExe();
+                    this.list[0].attack.exe();
                     break;
                 case 0b_10:
                     this.list[0].jump(this.controller.getStick().normalized);
@@ -139,7 +141,6 @@ public class Main : MonoBehaviour
         for (int i = 0; i < this.list.Count; i++)
         {
             this.list[i].update();
-            if (this.stop != 0) return;
             if (this.list[i].getHp() < 0 && this.list[i].getDamage() == 0)
             {
                 this.list.RemoveAt(i);
@@ -213,11 +214,6 @@ public class Main : MonoBehaviour
         }
         return ret;
     }
-    public int getFrame()
-    {
-        return this.frame;
-    }
-
     private void setMaterial(Transform transform, Texture t)
     {
         foreach (Transform child in transform)
@@ -229,8 +225,6 @@ public class Main : MonoBehaviour
         }
     }
 
-    public void setStop(int i)
-    {
-        if (this.stop == 0) this.stop = i;
-    }
+
+
 }

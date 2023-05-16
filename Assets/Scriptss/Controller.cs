@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 public class Controller
 {
-    int button;
-    Vector2[] stick;
+    int button; public int getButton() { return this.button; }
+    Vector2[] stick; public Vector3 getStick() { return new Vector3(this.stick[1].x, 0, this.stick[1].y); }
+
     public Controller()
     {
         for (int i = 0; i < 2; i++)
@@ -22,9 +23,9 @@ public class Controller
         for (int i = 0; i < Input.touchCount; i++)
         {
             Touch t = Input.GetTouch(i);
-            if (t.phase != TouchPhase.Began) break;
-            if ((t.position - (Vector2)GameObject.Find("A").transform.position).sqrMagnitude < (Screen.width * 0.05) * (Screen.width * 0.05)) this.button += 0b_01;
-            if ((t.position - (Vector2)GameObject.Find("B").transform.position).sqrMagnitude < (Screen.width * 0.05) * (Screen.width * 0.05)) this.button += 0b_10;
+            if (t.phase != TouchPhase.Began) continue;
+            if ((t.position - (Vector2)GameObject.Find("A").transform.position).sqrMagnitude < (Screen.width * 0.05) * (Screen.width * 0.05)) this.button |= 0b_01;
+            if ((t.position - (Vector2)GameObject.Find("B").transform.position).sqrMagnitude < (Screen.width * 0.05) * (Screen.width * 0.05)) this.button |= 0b_10;
         }
         this.stick[1] = Vector2.zero;
         for (int i = 0; i < Input.touchCount; i++)
@@ -36,10 +37,8 @@ public class Controller
         }
         // Debug
         {
-            if (Input.GetKeyDown(KeyCode.Z)) this.button = 0b_01;
-            if (Input.GetKeyDown(KeyCode.X)) this.button = 0b_10;
+            if (Input.GetKeyDown(KeyCode.Z)) this.button |= 0b_01;
+            if (Input.GetKeyDown(KeyCode.X)) this.button |= 0b_10;
         }
     }
-    public int getButton() { return this.button; }
-    public Vector3 getStick() { return new Vector3(this.stick[1].x, 0, this.stick[1].y); }
 }
