@@ -8,6 +8,7 @@ public class Main : MonoBehaviour
     List<Ninja> list;
     Ninja player;
     int stage;
+    List<Texture> texList;
 
     void Awake()
     {
@@ -19,6 +20,9 @@ public class Main : MonoBehaviour
     {
         this.controller = new Controller();
         this.list = new List<Ninja>();
+
+        this.texture();
+
         this.reset();
     }
 
@@ -93,14 +97,14 @@ public class Main : MonoBehaviour
             if (player == null)
             {
                 this.reset();
-                this.player = this.newNinja();
-                this.player.setHp(8);
+                this.player = this.newNinja(8);
+                this.player.setHp(64);
                 this.player.setAi(null);
                 return;
             }
 
             this.stage = 100 * (this.stage / 100) + 100;
-            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.newNinja();
+            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.newNinja(Random.Range(0, 8));
         }
     }
 
@@ -136,7 +140,7 @@ public class Main : MonoBehaviour
 
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 
-    private Ninja newNinja()
+    private Ninja newNinja(int i)
     {
         GameObject ninja = new GameObject();
         {
@@ -145,7 +149,7 @@ public class Main : MonoBehaviour
             gameObject.transform.localPosition = Vector3.zero;
             gameObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
         }
-        this.setTexture(ninja.transform, (Texture)Resources.Load("lloyd_movie"));
+        this.setTexture(ninja.transform, this.texList[i]);
         {
             GameObject gameObject = (GameObject)Instantiate(Resources.Load("Sword/Cube"), Vector3.zero, Quaternion.identity);
             gameObject.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
@@ -164,5 +168,22 @@ public class Main : MonoBehaviour
             MeshRenderer r = t.GetComponent<MeshRenderer>();
             if (r != null) r.material.SetTexture("_MainTex", texture);
         }
+    }
+
+    private void texture()
+    {
+        this.texList = new List<Texture>();
+
+        this.texList.Add((Texture)Resources.Load("kai"));
+        this.texList.Add((Texture)Resources.Load("jay"));
+        this.texList.Add((Texture)Resources.Load("zane"));
+        this.texList.Add((Texture)Resources.Load("cole"));
+
+        this.texList.Add((Texture)Resources.Load("lloyd"));
+        this.texList.Add((Texture)Resources.Load("nya"));
+        this.texList.Add((Texture)Resources.Load("arin"));
+        this.texList.Add((Texture)Resources.Load("sora"));
+
+        this.texList.Add((Texture)Resources.Load("lloyd_movie"));
     }
 }
