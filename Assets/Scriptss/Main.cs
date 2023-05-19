@@ -6,7 +6,7 @@ public class Main : MonoBehaviour
     Controller controller;
     int frame; public int getFrame() { return this.frame / 12; }
     List<Ninja> list;
-    List<Renderer> rList;
+    Ninja player;
 
     void Awake()
     {
@@ -18,7 +18,6 @@ public class Main : MonoBehaviour
     {
         this.controller = new Controller();
         this.list = new List<Ninja>();
-        this.rList = new List<Renderer>();
         this.reset();
     }
 
@@ -28,16 +27,11 @@ public class Main : MonoBehaviour
 
         this.list.Clear();
 
-        for (int i = 0; i < this.rList.Count; i++)
-        {
-            if (this.rList[i].getGameObject() != null) Destroy(this.rList[i].getGameObject());
-        }
-        this.rList.Clear();
+        this.newNinja();
+        this.player = this.list[0];
+        this.player.setAi(null);
 
-        this.newNinja(0);
-        this.list[0].setAi(null);
-
-        this.newNinja(0);
+        this.newNinja();
     }
 
 
@@ -50,29 +44,41 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < this.list.Count; i++)
         {
+            if (this.list[i].getHp() < -60)
+            {
+                if (i == 0) player = null;
+                Destroy(this.list[i].renderer.getGameObject());
+                this.list.RemoveAt(i);
+                i--;
+                continue;
+            }
             this.list[i].update();
         }
 
-
-        for (int i = 0; i < this.rList.Count; i++)
+        control();
+        void control()
         {
-            this.rList[i].update();
+            this.controller.update();
+            if (this.player == null) return;
+            if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
+
+            Vector3 s = this.controller.getStick().normalized;
+            this.list[0].addVec(s * 0.03f);
+            if (s != Vector3.zero) this.list[0].setRot(Quaternion.LookRotation(s));
+            switch (this.controller.getButton())
+            {
+                case 0b_01:
+                    this.list[0].attack.exe();
+                    break;
+                case 0b_10:
+                    this.list[0].jump(this.controller.getStick().normalized);
+                    break;
+            }
         }
 
-
-        this.controller.update();
-
-        Vector3 s = this.controller.getStick().normalized;
-        this.list[0].addVec(s * 0.03f);
-        if (s != Vector3.zero) this.list[0].setRot(Quaternion.LookRotation(s));
-        switch (this.controller.getButton())
+        for (int i = 0; i < this.list.Count; i++)
         {
-            case 0b_01:
-                this.list[0].attack.exe();
-                break;
-            case 0b_10:
-                this.list[0].jump(this.controller.getStick().normalized);
-                break;
+            this.list[i].renderer.update();
         }
     }
 
@@ -108,28 +114,23 @@ public class Main : MonoBehaviour
 
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 
-    private void newNinja(int i)
+    private void newNinja()
     {
-        Ninja n = new Ninja();
-
-        GameObject gameObject = new GameObject();
-        gameObject.transform.position = n.getPos();
-        gameObject.transform.localRotation = n.getRot();
-
-        GameObject g = (GameObject)Instantiate(Resources.Load("human"), Vector3.zero, Quaternion.identity);
-        g.transform.parent = gameObject.transform;
-        g.transform.localPosition = Vector3.zero;
-        g.transform.localRotation = Quaternion.Euler(0, 180, 0);
-
-        this.setTexture(gameObject.transform, (Texture)Resources.Load("lloyd_movie"));
-
-        GameObject sword = (GameObject)Instantiate(Resources.Load("Sword/Cube"), Vector3.zero, Quaternion.identity);
-        sword.transform.parent = gameObject.transform.GetChild(0).GetChild(4).transform;
-        sword.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
-        sword.transform.localRotation = Quaternion.Euler(45, 0, 0);
-
-        this.list.Add(n);
-        this.rList.Add(new Renderer(this.list[this.list.Count - 1], gameObject));
+        GameObject ninja = new GameObject();
+        {
+            GameObject gameObject = (GameObject)Instantiate(Resources.Load("human"), Vector3.zero, Quaternion.identity);
+            gameObject.transform.parent = ninja.transform;
+            gameObject.transform.localPosition = Vector3.zero;
+            gameObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
+        }
+        this.setTexture(ninja.transform, (Texture)Resources.Load("lloyd_movie"));
+        {
+            GameObject gameObject = (GameObject)Instantiate(Resources.Load("Sword/Cube"), Vector3.zero, Quaternion.identity);
+            gameObject.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
+            gameObject.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
+            gameObject.transform.localRotation = Quaternion.Euler(45, 0, 0);
+        }
+        this.list.Add(new Ninja(ninja));
     }
 
     private void setTexture(Transform transform, Texture texture)

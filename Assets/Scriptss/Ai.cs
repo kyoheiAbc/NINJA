@@ -12,6 +12,10 @@ public class Ai
     }
     public void update()
     {
+        if (this.ninja.getStun() > 0) this.atk = false;
+
+        if (this.ninja.getHp() < 0 || this.ninja.getStun() > 0) return;
+
         Vector3 v = this.target.getPos() - this.ninja.getPos();
         v.y = 0;
         if (v != Vector3.zero) this.ninja.setRot(Quaternion.LookRotation(v));
@@ -23,7 +27,7 @@ public class Ai
         {
             if (this.atk) return;
             if (this.ninja.attack.getI() != 0) return;
-            if (Random.Range(0, 30) != 0) return;
+            if (Random.Range(0, 90) != 0) return;
             if (!this.ninja.jump((this.ninja.getRot() * new Vector3(Random.Range(-1, 2), 0, Random.Range(-1, 2))))) return;
             this.atk = true;
         }

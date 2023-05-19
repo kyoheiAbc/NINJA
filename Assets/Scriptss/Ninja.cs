@@ -2,30 +2,41 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Ninja
 {
-    Ai ai; public Ai getAi() { return this.ai; }
+    Ai ai;
     public void setAi(Ai s) { this.ai = s; }
 
     public Attack attack;
+    int hp; public int getHp() { return this.hp; }
     Vector3 pos; public Vector3 getPos() { return this.pos; }
     float random; public float getRandom() { return this.random; }
-
+    public Renderer renderer;
     Quaternion rot; public Quaternion getRot() { return this.rot; }
     public void setRot(Quaternion s) { this.rot = s; }
+    int stun; public int getStun() { return this.stun; }
+    public void setStun(int s) { this.stun = s; }
 
     Vector3 vec; public Vector3 getVec() { return this.vec; }
 
-    public Ninja()
+    public void addHp(int a) { this.hp += a; }
+    public void addVec(Vector3 a) { this.vec += a; }
+
+    public Ninja(GameObject gameObject)
     {
         this.ai = new Ai(this);
         this.attack = new Attack(this);
+        this.hp = 4;
         this.pos = new Vector3(Random.Range(-10, 10), Random.Range(0, 10), Random.Range(-10, 10));
         this.random = Random.Range(0, 1f);
+        this.renderer = new Renderer(this, gameObject);
         this.rot = Quaternion.identity;
+        this.stun = 0;
         this.vec = Vector3.zero;
     }
 
     public void update()
     {
+        if (this.hp < 0) this.hp--;
+        if (this.stun > 0) this.stun--;
 
         List<Ninja> l = Main.instance.getList(this, 1, 180);
         for (int i = 0; i < l.Count; i++)
@@ -60,8 +71,6 @@ public class Ninja
         if (Mathf.Abs(this.pos.y) > 10) this.vec += 0.1f * Vector3.down;
     }
 
-    public void addVec(Vector3 a) { this.vec += a; }
-
     public bool jump(Vector3 v)
     {
         if (pos.y != 0) return false;
@@ -74,6 +83,8 @@ public class Attack
 {
     Ninja ninja;
     int i; public int getI() { return this.i; }
+    public void setI(int s) { this.i = s; }
+
     public Attack(Ninja n)
     {
         this.ninja = n;
@@ -93,10 +104,14 @@ public class Attack
         if (this.i % 100 == 0) this.i = 0;
 
         if (this.i % 100 != 25) return;
-        List<Ninja> l = Main.instance.getList(this.ninja, 2.5f * 2.5f, 45);
+        List<Ninja> l = Main.instance.getList(this.ninja, 2f * 2f, 45);
         for (int i = 0; i < l.Count; i++)
         {
-            l[i].addVec(Main.forward(this.ninja.getRot()) * 0.25f);
+            int c = this.i / 100;
+            l[i].addHp(-c);
+            l[i].addVec(Main.forward(this.ninja.getRot()) * 0.2f * c);
+            l[i].setStun(5);
+            l[i].attack.setI(0);
         }
     }
 }

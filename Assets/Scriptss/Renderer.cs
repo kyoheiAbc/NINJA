@@ -19,7 +19,10 @@ public class Renderer
             this.transform[i + 1] = this.transform[0].GetChild(0).GetChild(i + 2).gameObject.transform;
         }
 
-        this.walk = Quaternion.Euler(45, 0, 0);
+        this.transform[0].position = this.ninja.getPos();
+        this.transform[0].localRotation = this.ninja.getRot();
+
+        this.walk = Quaternion.Euler(30, 0, 0);
 
         this.attack = new Quaternion[2] { Quaternion.Euler(90, 0, 90), Quaternion.Euler(180, 0, 0) };
     }
@@ -29,6 +32,7 @@ public class Renderer
         float frame = (Main.instance.getFrame() % 30) / 30f;
         Vector3 old = this.transform[0].position;
 
+        this.gameObject.SetActive(true);
         for (int i = 0; i < 5; i++)
         {
             this.transform[i].localRotation = Quaternion.identity;
@@ -57,6 +61,11 @@ public class Renderer
             f = Mathf.Clamp(f, 0, 1);
             int c = i / 100;
             this.transform[3].localRotation = this.attack[1 - c % 2] * Quaternion.AngleAxis(-180 * f, new Vector3(1 - c % 2, 0, c % 2));
+        }
+
+        if (this.ninja.getStun() > 0 || this.ninja.getHp() < 0)
+        {
+            this.gameObject.SetActive(Mathf.Sin(16 * Mathf.PI * (frame + this.ninja.getRandom())) > 0);
         }
     }
 }
