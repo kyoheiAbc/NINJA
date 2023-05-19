@@ -88,7 +88,7 @@ public class Main : MonoBehaviour
 
             this.stage++;
 
-            if (this.stage % 100 < 60) return;
+            if (this.stage % 100 < 30) return;
 
             if (player == null)
             {

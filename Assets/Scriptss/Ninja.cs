@@ -8,6 +8,7 @@ public class Ninja
     int hp; public int getHp() { return this.hp; }
     public void setHp(int s) { this.hp = s; }
     Vector3 pos; public Vector3 getPos() { return this.pos; }
+    public void setPos(Vector3 s) { this.pos = s; }
     float random; public float getRandom() { return this.random; }
     public Renderer renderer;
     Quaternion rot; public Quaternion getRot() { return this.rot; }
