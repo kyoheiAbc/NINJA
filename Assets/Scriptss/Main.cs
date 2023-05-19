@@ -62,7 +62,7 @@ public class Main : MonoBehaviour
             if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
 
             Vector3 s = this.controller.getStick().normalized;
-            this.list[0].addVec(s * 0.03f);
+            this.list[0].addPos(s * 0.1f);
             if (s != Vector3.zero) this.list[0].setRot(Quaternion.LookRotation(s));
             switch (this.controller.getButton())
             {

@@ -16,11 +16,13 @@ public class Ai
 
         if (this.ninja.getHp() < 0 || this.ninja.getStun() > 0) return;
 
+        this.target = Main.instance.nearestNinja(this.ninja);
+
         Vector3 v = this.target.getPos() - this.ninja.getPos();
         v.y = 0;
         if (v != Vector3.zero) this.ninja.setRot(Quaternion.LookRotation(v));
 
-        if (this.atk) this.ninja.addVec(v.normalized * 0.03f);
+        if (this.atk) this.ninja.addPos(v.normalized * 0.1f);
 
         atk();
         void atk()

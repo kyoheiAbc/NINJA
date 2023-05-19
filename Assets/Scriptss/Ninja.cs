@@ -4,7 +4,6 @@ public class Ninja
 {
     Ai ai;
     public void setAi(Ai s) { this.ai = s; }
-
     public Attack attack;
     int hp; public int getHp() { return this.hp; }
     public void setHp(int s) { this.hp = s; }
@@ -19,6 +18,7 @@ public class Ninja
     Vector3 vec; public Vector3 getVec() { return this.vec; }
 
     public void addHp(int a) { this.hp += a; }
+    public void addPos(Vector3 a) { this.pos += a; }
     public void addVec(Vector3 a) { this.vec += a; }
 
     public Ninja(GameObject gameObject)
