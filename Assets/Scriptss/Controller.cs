@@ -35,7 +35,7 @@ public class Controller
             if (t.phase == TouchPhase.Began) this.stick[0] = t.position;
             this.stick[1] = t.position - this.stick[0];
         }
-        // Debug
+
         {
             if (Input.GetKeyDown(KeyCode.Z)) this.button |= 0b_01;
             if (Input.GetKeyDown(KeyCode.X)) this.button |= 0b_10;
