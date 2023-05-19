@@ -7,6 +7,7 @@ public class Main : MonoBehaviour
     int frame; public int getFrame() { return this.frame / 12; }
     List<Ninja> list;
     Ninja player;
+    int stage;
 
     void Awake()
     {
@@ -25,13 +26,12 @@ public class Main : MonoBehaviour
     {
         this.frame = 0;
 
+        for (int i = 0; i < this.list.Count; i++) Destroy(this.list[i].renderer.getGameObject());
         this.list.Clear();
 
-        this.newNinja();
-        this.player = this.list[0];
-        this.player.setAi(null);
+        this.player = null;
 
-        this.newNinja();
+        this.stage = 0;
     }
 
 
@@ -40,7 +40,6 @@ public class Main : MonoBehaviour
 
         this.frame += 12;
         if (this.frame == 12 * 60 * 3) this.frame = 0;
-
 
         for (int i = 0; i < this.list.Count; i++)
         {
@@ -80,6 +79,29 @@ public class Main : MonoBehaviour
         {
             this.list[i].renderer.update();
         }
+
+
+        stage();
+        void stage()
+        {
+            if (player != null && this.list.Count > 1) return;
+
+            this.stage++;
+
+            if (this.stage % 100 < 60) return;
+
+            if (player == null)
+            {
+                this.reset();
+                this.player = this.newNinja();
+                this.player.setHp(8);
+                this.player.setAi(null);
+                return;
+            }
+
+            this.stage = 100 * (this.stage / 100) + 100;
+            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.newNinja();
+        }
     }
 
 
@@ -114,7 +136,7 @@ public class Main : MonoBehaviour
 
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 
-    private void newNinja()
+    private Ninja newNinja()
     {
         GameObject ninja = new GameObject();
         {
@@ -131,6 +153,7 @@ public class Main : MonoBehaviour
             gameObject.transform.localRotation = Quaternion.Euler(45, 0, 0);
         }
         this.list.Add(new Ninja(ninja));
+        return this.list[this.list.Count - 1];
     }
 
     private void setTexture(Transform transform, Texture texture)

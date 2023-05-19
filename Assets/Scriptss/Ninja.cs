@@ -7,6 +7,7 @@ public class Ninja
 
     public Attack attack;
     int hp; public int getHp() { return this.hp; }
+    public void setHp(int s) { this.hp = s; }
     Vector3 pos; public Vector3 getPos() { return this.pos; }
     float random; public float getRandom() { return this.random; }
     public Renderer renderer;
