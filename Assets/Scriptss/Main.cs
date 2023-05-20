@@ -8,21 +8,18 @@ public class Main : MonoBehaviour
     List<Ninja> list;
     Ninja player;
     int stage;
-    List<Texture> texList;
 
     void Awake()
     {
         instance = this;
         Application.targetFrameRate = 30;
+        Static.texture();
     }
 
     void Start()
     {
         this.controller = new Controller();
         this.list = new List<Ninja>();
-
-        this.texture();
-
         this.reset();
     }
 
@@ -97,14 +94,15 @@ public class Main : MonoBehaviour
             if (player == null)
             {
                 this.reset();
-                this.player = this.newNinja(8);
+                this.player = newNinja(Static.playerI);
                 this.player.setHp(64);
                 this.player.setAi(null);
+                this.list.Add(this.player);
                 return;
             }
 
             this.stage = 100 * (this.stage / 100) + 100;
-            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.newNinja(Random.Range(0, 8));
+            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(newNinja(Random.Range(0, 8)));
         }
     }
 
@@ -116,7 +114,7 @@ public class Main : MonoBehaviour
         {
             if (this.list[i] == n) continue;
             if ((this.list[i].getPos() - n.getPos()).sqrMagnitude > d) continue;
-            if (Vector3.Angle(forward(n.getRot()), this.list[i].getPos() - n.getPos()) > a) continue;
+            if (Vector3.Angle(Static.forward(n.getRot()), this.list[i].getPos() - n.getPos()) > a) continue;
             ret.Add(this.list[i]);
         }
         return ret;
@@ -138,7 +136,6 @@ public class Main : MonoBehaviour
         return ret;
     }
 
-    static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 
     private Ninja newNinja(int i)
     {
@@ -149,41 +146,46 @@ public class Main : MonoBehaviour
             gameObject.transform.localPosition = Vector3.zero;
             gameObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
         }
-        this.setTexture(ninja.transform, this.texList[i]);
+        Static.setTexture(ninja.transform, Static.texList[i]);
         {
             GameObject gameObject = (GameObject)Instantiate(Resources.Load("Sword/Cube"), Vector3.zero, Quaternion.identity);
             gameObject.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
             gameObject.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
             gameObject.transform.localRotation = Quaternion.Euler(45, 0, 0);
         }
-        this.list.Add(new Ninja(ninja));
-        return this.list[this.list.Count - 1];
+        return new Ninja(ninja);
     }
+}
 
-    private void setTexture(Transform transform, Texture texture)
+public static class Static
+{
+    static public int playerI = 0;
+    static public List<Texture> texList;
+    static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
+    static public void texture()
+    {
+        if (Static.texList != null) return;
+        Static.texList = new List<Texture>();
+
+        Static.texList.Add((Texture)Resources.Load("kai"));
+        Static.texList.Add((Texture)Resources.Load("jay"));
+        Static.texList.Add((Texture)Resources.Load("zane"));
+        Static.texList.Add((Texture)Resources.Load("cole"));
+
+        Static.texList.Add((Texture)Resources.Load("lloyd"));
+        Static.texList.Add((Texture)Resources.Load("nya"));
+        Static.texList.Add((Texture)Resources.Load("arin"));
+        Static.texList.Add((Texture)Resources.Load("sora"));
+
+        Static.texList.Add((Texture)Resources.Load("lloyd_movie"));
+    }
+    static public void setTexture(Transform transform, Texture texture)
     {
         foreach (Transform t in transform)
         {
-            if (t.childCount > 0) this.setTexture(t, texture);
+            if (t.childCount > 0) Static.setTexture(t, texture);
             MeshRenderer r = t.GetComponent<MeshRenderer>();
             if (r != null) r.material.SetTexture("_MainTex", texture);
         }
-    }
-
-    private void texture()
-    {
-        this.texList = new List<Texture>();
-
-        this.texList.Add((Texture)Resources.Load("kai"));
-        this.texList.Add((Texture)Resources.Load("jay"));
-        this.texList.Add((Texture)Resources.Load("zane"));
-        this.texList.Add((Texture)Resources.Load("cole"));
-
-        this.texList.Add((Texture)Resources.Load("lloyd"));
-        this.texList.Add((Texture)Resources.Load("nya"));
-        this.texList.Add((Texture)Resources.Load("arin"));
-        this.texList.Add((Texture)Resources.Load("sora"));
-
-        this.texList.Add((Texture)Resources.Load("lloyd_movie"));
     }
 }

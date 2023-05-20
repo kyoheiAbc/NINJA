@@ -27,7 +27,7 @@ public class Ninja
         this.ai = new Ai(this);
         this.attack = new Attack(this);
         this.hp = 4;
-        this.pos = new Vector3(Random.Range(-10, 10), Random.Range(0, 10), Random.Range(-10, 10));
+        this.pos = new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10));
         this.random = Random.Range(0, 1f);
         this.renderer = new Renderer(this, gameObject);
         this.rot = Quaternion.identity;
@@ -111,7 +111,7 @@ public class Attack
         {
             int c = this.i / 100;
             l[i].addHp(-c);
-            l[i].addVec(Main.forward(this.ninja.getRot()) * 0.2f * c);
+            l[i].addVec(Static.forward(this.ninja.getRot()) * 0.2f * c + 0.1f * c * Vector3.up);
             l[i].setStun(5);
             l[i].attack.setI(0);
         }
