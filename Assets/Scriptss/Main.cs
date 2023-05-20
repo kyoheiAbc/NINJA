@@ -159,7 +159,7 @@ public class Main : MonoBehaviour
 
 public static class Static
 {
-    static public int playerI = 0;
+    static public int playerI = 4;
     static public List<Texture> texList;
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
     static public void texture()

@@ -106,7 +106,8 @@ public class Attack
         if (this.i % 100 == 0) this.i = 0;
 
         if (this.i % 100 != 25) return;
-        List<Ninja> l = Main.instance.getList(this.ninja, 2f * 2f, 45);
+        List<Ninja> l = Main.instance.getList(this.ninja, 2.5f * 2.5f, 90);
+
         for (int i = 0; i < l.Count; i++)
         {
             int c = this.i / 100;
