@@ -59,8 +59,9 @@ public class Renderer
             if (i == 0) return;
             float f = (30 - i % 100) / 4f;
             f = Mathf.Clamp(f, 0, 1);
+            float cos = 0.5f - Mathf.Cos(Mathf.PI * f) * 0.5f;
             int c = i / 100;
-            this.transform[3].localRotation = this.attack[1 - c % 2] * Quaternion.AngleAxis(-180 * f, new Vector3(1 - c % 2, 0, c % 2));
+            this.transform[3].localRotation = this.attack[1 - c % 2] * Quaternion.AngleAxis(-180 * cos, new Vector3(1 - c % 2, 0, c % 2));
         }
 
         if (this.ninja.getStun() > 0 || this.ninja.getHp() < 0)

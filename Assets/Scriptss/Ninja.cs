@@ -13,6 +13,7 @@ public class Ninja
     public Renderer renderer;
     Quaternion rot; public Quaternion getRot() { return this.rot; }
     public void setRot(Quaternion s) { this.rot = s; }
+    public Special special;
     int stun; public int getStun() { return this.stun; }
     public void setStun(int s) { this.stun = s; }
 
@@ -31,6 +32,7 @@ public class Ninja
         this.random = Random.Range(0, 1f);
         this.renderer = new Renderer(this, gameObject);
         this.rot = Quaternion.identity;
+        this.special = new Special(this);
         this.stun = 0;
         this.vec = Vector3.zero;
     }
@@ -40,37 +42,42 @@ public class Ninja
         if (this.hp < 0) this.hp--;
         if (this.stun > 0) this.stun--;
 
-        List<Ninja> l = Main.instance.getList(this, 1, 180);
-        for (int i = 0; i < l.Count; i++)
+        physics();
+        void physics()
         {
-            Vector3 v = l[i].getPos() - this.getPos();
-            v.y = 0;
-            v = v.normalized;
-            if (v == Vector3.zero) v = new Vector3(Random.Range(-1, 2), 0, Random.Range(-1, 2));
-            this.addVec(v * -0.1f);
-            l[i].addVec(v * 0.1f);
-        }
+            if (Main.instance.getPlayer() == null) return;
 
-        this.pos += this.vec;
-        this.vec.x *= 0.75f;
-        this.vec.z *= 0.75f;
-        if (this.pos.y < 0.001f)
-        {
-            this.pos.y = 0;
-            this.vec.y = 0;
-        }
-        else
-        {
-            this.vec.y -= 0.05f;
+            this.pos += this.vec;
+            this.vec.x *= 0.75f;
+            this.vec.z *= 0.75f;
+            if (this.pos.y > 0.001f) this.vec.y -= 0.05f;
+            else
+            {
+                this.pos.y = 0;
+                this.vec.y = 0;
+            }
+
+            List<Ninja> l = Main.instance.getList(this, 1, 180);
+            for (int i = 0; i < l.Count; i++)
+            {
+                Vector3 v = l[i].getPos() - this.getPos();
+                v.y = 0;
+                v = v.normalized;
+                if (v == Vector3.zero) v = new Vector3(Random.Range(-1, 2), 0, Random.Range(-1, 2));
+                this.addVec(v * -0.1f);
+                l[i].addVec(v * 0.1f);
+            }
+
+            if (Mathf.Abs(this.pos.x) > 10) this.vec += 0.1f * Mathf.Sign(this.pos.x) * Vector3.left;
+            if (Mathf.Abs(this.pos.z) > 10) this.vec += 0.1f * Mathf.Sign(this.pos.z) * Vector3.back;
+            if (Mathf.Abs(this.pos.y) > 10) this.vec += 0.1f * Vector3.down;
         }
 
         this.attack.update();
 
-        if (this.ai != null) this.ai.update();
+        this.special.update();
 
-        if (Mathf.Abs(this.pos.x) > 10) this.vec += 0.1f * Mathf.Sign(this.pos.x) * Vector3.left;
-        if (Mathf.Abs(this.pos.z) > 10) this.vec += 0.1f * Mathf.Sign(this.pos.z) * Vector3.back;
-        if (Mathf.Abs(this.pos.y) > 10) this.vec += 0.1f * Vector3.down;
+        if (this.ai != null) this.ai.update();
     }
 
     public bool jump(Vector3 v)
@@ -106,6 +113,9 @@ public class Attack
         if (this.i % 100 == 0) this.i = 0;
 
         if (this.i % 100 != 25) return;
+
+        if (Main.instance.getPlayer() == null) return;
+
         List<Ninja> l = Main.instance.getList(this.ninja, 2.5f * 2.5f, 90);
 
         for (int i = 0; i < l.Count; i++)

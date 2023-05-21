@@ -22,7 +22,8 @@ public class Ai
 
         if (Main.instance.getFrame() % 30 == (int)(30 * this.ninja.getRandom()))
         {
-            this.target = Main.instance.nearestNinja(this.ninja);
+            // this.target = Main.instance.nearestNinja(this.ninja);
+            this.target = Main.instance.getPlayer();
         }
 
         Vector3 v = this.target.getPos() - this.ninja.getPos();
