@@ -8,6 +8,10 @@ public class Controller
 
     public Controller()
     {
+        this.stick = new Vector2[2];
+    }
+    public void start()
+    {
         for (int y = 0; y < 2; y++)
         {
             for (int x = 0; x < 2; x++)
@@ -19,10 +23,18 @@ public class Controller
                 image.rectTransform.position = new Vector2((0.15f * x + 0.75f) * Screen.width, (0.15f * y + 0.1f) * Screen.width);
                 image.rectTransform.sizeDelta = new Vector2(0.1f * Screen.width, 0.1f * Screen.width);
                 image.color = Color.HSVToRGB((x + 2 * y) / 6f, 0.5f, 1f);
+                image.color = new Color(image.color.r, image.color.g, image.color.b, 0.3f);
             }
         }
-        this.stick = new Vector2[2];
     }
+    public void reset()
+    {
+        GameObject.Find("A").GetComponent<Image>().rectTransform.sizeDelta = new Vector2(0, 0);
+        GameObject.Find("B").GetComponent<Image>().rectTransform.sizeDelta = new Vector2(0, 0);
+        GameObject.Find("C").GetComponent<Image>().rectTransform.sizeDelta = new Vector2(0, 0);
+        GameObject.Find("D").GetComponent<Image>().rectTransform.sizeDelta = new Vector2(0, 0);
+    }
+
     public void update()
     {
         this.button = 0;

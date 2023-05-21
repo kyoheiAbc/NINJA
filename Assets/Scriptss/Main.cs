@@ -16,6 +16,8 @@ public class Main : MonoBehaviour
         Application.targetFrameRate = 30;
 
         this.cam = GameObject.Find("Camera").GetComponent<Camera>();
+        this.cam.clearFlags = CameraClearFlags.SolidColor;
+
         this.controller = new Controller();
         Main.instance = this;
         this.list = new List<Ninja>();
@@ -56,6 +58,9 @@ public class Main : MonoBehaviour
         }
         this.cam.transform.parent.position /= f;
         this.cam.transform.parent.position += new Vector3(0, 1, -400);
+        this.cam.backgroundColor = Color.HSVToRGB(1 / 6f, 0.5f, 0.8f);
+
+        this.controller.reset();
     }
 
 
@@ -165,16 +170,24 @@ public class Main : MonoBehaviour
 
             this.player = this.list[i];
             this.player.setPos(new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10)));
+            this.player.renderer.update();
 
             this.cam.transform.parent.position = new Vector3(0, 22.5f, -40);
             this.cam.transform.parent.eulerAngles = new Vector3(30, 0, 0);
             this.cam.fieldOfView = 15;
+            this.cam.backgroundColor = Color.HSVToRGB(120 / 360f, 0.3f, 0.5f);
 
             for (int i_ = 0; i_ < this.list.Count; i_++)
             {
                 if (this.list[i_] == this.player) continue;
-                this.list[i_].setHp(-61);
+                Destroy(this.list[i_].renderer.getGameObject());
+                this.list.RemoveAt(i_);
+                i_--;
             }
+
+            this.controller.start();
+
+            return;
         }
     }
 
