@@ -45,8 +45,6 @@ public class Ninja
         physics();
         void physics()
         {
-            if (Main.instance.getPlayer() == null) return;
-
             this.pos += this.vec;
             this.vec.x *= 0.75f;
             this.vec.z *= 0.75f;
@@ -68,9 +66,9 @@ public class Ninja
                 l[i].addVec(v * 0.1f);
             }
 
-            if (Mathf.Abs(this.pos.x) > 10) this.vec += 0.1f * Mathf.Sign(this.pos.x) * Vector3.left;
-            if (Mathf.Abs(this.pos.z) > 10) this.vec += 0.1f * Mathf.Sign(this.pos.z) * Vector3.back;
-            if (Mathf.Abs(this.pos.y) > 10) this.vec += 0.1f * Vector3.down;
+            if (Mathf.Abs(this.pos.x) > Main.instance.getFieldSize()) this.vec += 0.1f * Mathf.Sign(this.pos.x) * Vector3.left;
+            if (Mathf.Abs(this.pos.z) > Main.instance.getFieldSize()) this.vec += 0.1f * Mathf.Sign(this.pos.z) * Vector3.back;
+            if (Mathf.Abs(this.pos.y) > Main.instance.getFieldSize()) this.vec += 0.1f * Vector3.down;
         }
 
         this.attack.update();
@@ -114,15 +112,13 @@ public class Attack
 
         if (this.i % 100 != 25) return;
 
-        if (Main.instance.getPlayer() == null) return;
-
         List<Ninja> l = Main.instance.getList(this.ninja, 2.5f * 2.5f, 90);
 
         for (int i = 0; i < l.Count; i++)
         {
             int c = this.i / 100;
             l[i].addHp(-c);
-            l[i].addVec(Static.forward(this.ninja.getRot()) * 0.2f * c + 0.1f * c * Vector3.up);
+            l[i].addVec(Main.forward(this.ninja.getRot()) * 0.2f * c + 0.1f * c * Vector3.up);
             l[i].setStun(5);
             l[i].attack.setI(0);
         }

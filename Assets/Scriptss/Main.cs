@@ -1,33 +1,80 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
 public class Main : MonoBehaviour
 {
-    Camera cam; public Camera getCam() { return this.cam; }
+    public RectTransform[] button;
+    public Camera cam;
     Controller controller;
+    int fieldSize; public int getFieldSize() { return this.fieldSize; }
     int frame; public int getFrame() { return this.frame / 12; }
     static public Main instance;
     List<Ninja> list;
     Ninja player; public Ninja getPlayer() { return this.player; }
-    int stage; public int getStage() { return this.stage; }
-    List<Texture> texList;
+    int stage;
+    Texture[] texList;
+
+    void Awake()
+    {
+        this.cam = this.gameObject.AddComponent<Camera>();
+        this.cam.clearFlags = CameraClearFlags.SolidColor;
+
+        Light l = this.gameObject.AddComponent<Light>();
+        l.type = LightType.Directional;
+
+        {
+            GameObject canvas = new GameObject();
+            canvas.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+
+            this.button = new RectTransform[4];
+            for (int i = 0; i < this.button.Length; i++)
+            {
+                GameObject g = new GameObject();
+                Image img = g.AddComponent<Image>();
+                g.transform.SetParent(canvas.transform, false);
+                this.button[i] = img.rectTransform;
+            }
+
+            float f = 0.13f * Screen.width;
+            for (int y = 0; y < 2; y++)
+            {
+                for (int x = 0; x < 2; x++)
+                {
+                    this.button[x + 2 * y].position = new Vector2(Screen.width - f, f);
+                    this.button[x + 2 * y].sizeDelta = new Vector2(0.08f * Screen.width, 0.08f * Screen.width);
+                    Color c = Color.HSVToRGB((x + 2 * y) / 6f, 0.5f, 1f);
+                    c = new Color(c.r, c.g, c.b, 0.3f);
+                    this.button[x + 2 * y].GetComponent<Image>().color = c;
+                    this.button[x + 2 * y].GetComponent<Image>().sprite = Resources.Load<Sprite>("circle");
+                }
+            }
+            f = 0.07f * Screen.width;
+            this.button[0].position = (Vector2)this.button[0].position + new Vector2(f, 0);
+            this.button[1].position = (Vector2)this.button[1].position + new Vector2(0, f);
+            this.button[2].position = (Vector2)this.button[2].position - new Vector2(0, f);
+            this.button[3].position = (Vector2)this.button[3].position - new Vector2(f, 0);
+        }
+
+
+        this.texture();
+
+        Main.instance = this;
+
+        Application.targetFrameRate = 30;
+    }
 
     void Start()
     {
-        Application.targetFrameRate = 30;
-
-        this.cam = GameObject.Find("Camera").GetComponent<Camera>();
-        this.cam.clearFlags = CameraClearFlags.SolidColor;
-
         this.controller = new Controller();
-        Main.instance = this;
         this.list = new List<Ninja>();
-        this.texture();
-
         this.reset();
     }
 
     private void reset()
     {
+        this.fieldSize = int.MaxValue;
+
         this.frame = 0;
 
         for (int i = 0; i < this.list.Count; i++) Destroy(this.list[i].renderer.getGameObject());
@@ -37,8 +84,8 @@ public class Main : MonoBehaviour
 
         this.stage = 0;
 
-        this.cam.transform.parent.position = Vector3.zero;
-        this.cam.transform.parent.localRotation = Quaternion.identity;
+        this.gameObject.transform.position = Vector3.zero;
+        this.gameObject.transform.localRotation = Quaternion.identity;
         this.cam.fieldOfView = 1;
         float f = 0;
         for (int y = 0; y < 2; y++)
@@ -46,27 +93,27 @@ public class Main : MonoBehaviour
             for (int x = 0; x < 4; x++)
             {
                 f++;
-
                 Ninja n = newNinja(x + 4 * y);
-                n.setPos(new Vector3(2 * x, -3 * y, 0));
-                n.setRot(Quaternion.Euler(0, 210, 0));
+                n.setPos(new Vector3(100 * (x + 4 * y), 0, 0));
+                n.setRot(Quaternion.identity);
                 n.setAi(null);
+                n.renderer.setWalkEn(true);
                 this.list.Add(n);
-
-                this.cam.transform.parent.position += n.getPos();
+                n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = Vector3.zero;
+                n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = -n.getPos() + new Vector3(2 * x, -3 * y, 0);
+                n.renderer.getGameObject().transform.GetChild(0).transform.localRotation = Quaternion.Euler(0, 30, 0);
+                this.gameObject.transform.position += new Vector3(2 * x, -3 * y, 0);
             }
         }
-        this.cam.transform.parent.position /= f;
-        this.cam.transform.parent.position += new Vector3(0, 1, -400);
+        this.gameObject.transform.position /= f;
+        this.gameObject.transform.position += new Vector3(0, 1, -400);
         this.cam.backgroundColor = Color.HSVToRGB(1 / 6f, 0.5f, 0.8f);
 
-        this.controller.reset();
     }
 
 
     void Update()
     {
-
         this.frame += 12;
         if (this.frame == 12 * 60 * 3) this.frame = 0;
 
@@ -87,6 +134,7 @@ public class Main : MonoBehaviour
         {
             this.controller.update();
             if (this.player == null) return;
+            if (this.cam.fieldOfView == 1) return;
             if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
 
             Vector3 s = this.controller.getStick().normalized;
@@ -94,16 +142,16 @@ public class Main : MonoBehaviour
             if (s != Vector3.zero) this.player.setRot(Quaternion.LookRotation(s));
             switch (this.controller.getButton())
             {
-                case 0b_0001:
+                case 1:
                     this.player.attack.exe();
                     break;
-                case 0b_0010:
+                case 2:
+                    this.player.special.setI(60);
+                    break;
+                case 4:
                     this.player.jump(this.controller.getStick().normalized);
                     break;
-                case 0b_0100:
-                    break;
-                case 0b_1000:
-                    this.player.special.setI(60);
+                case 8:
                     break;
             }
         }
@@ -125,7 +173,7 @@ public class Main : MonoBehaviour
         {
             if (this.list[i] == n) continue;
             if ((this.list[i].getPos() - n.getPos()).sqrMagnitude > d) continue;
-            if (Vector3.Angle(Static.forward(n.getRot()), this.list[i].getPos() - n.getPos()) > a) continue;
+            if (Vector3.Angle(Main.forward(n.getRot()), this.list[i].getPos() - n.getPos()) > a) continue;
             ret.Add(this.list[i]);
         }
         return ret;
@@ -149,15 +197,12 @@ public class Main : MonoBehaviour
 
     private void charSel()
     {
-        for (int i = 0; i < this.list.Count; i++) this.list[i].addPos(new Vector3(0.001f, 0, 0));
-        this.cam.transform.parent.transform.position += new Vector3(0.001f, 0, 0);
-
         Vector2 t = this.controller.getTouchBegan();
         if (t != new Vector2(0, 0))
         {
             for (int i = 0; i < this.list.Count; i++)
             {
-                Vector2 n = (Vector2)this.list[i].getPos() + new Vector2(0, 1);
+                Vector2 n = (Vector2)this.list[i].renderer.getGameObject().transform.GetChild(0).transform.position + new Vector2(0, 1);
                 if ((t - n).sqrMagnitude > 0.75f * 0.75f) continue;
                 this.list[i].attack.exe();
                 break;
@@ -167,13 +212,28 @@ public class Main : MonoBehaviour
         for (int i = 0; i < this.list.Count; i++)
         {
             if (this.list[i].attack.getI() != 301) continue;
+            this.list[i].addVec(0.75f * Vector3.up);
+            this.player = list[i];
+        }
+    }
 
-            this.player = this.list[i];
+    private void stageSel()
+    {
+        if (this.cam.fieldOfView == 1 || this.player.getHp() < -60 || this.list.Count == 1) this.stage++;
+
+        if (this.stage % 100 < 30) return;
+
+        if (this.cam.fieldOfView == 1)
+        {
+            this.player.renderer.getGameObject().transform.GetChild(0).transform.localPosition = Vector3.zero;
+            this.player.renderer.getGameObject().transform.GetChild(0).transform.localRotation = Quaternion.Euler(0, 180, 0);
+
             this.player.setPos(new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10)));
+            this.player.renderer.setWalkEn(false);
             this.player.renderer.update();
 
-            this.cam.transform.parent.position = new Vector3(0, 22.5f, -40);
-            this.cam.transform.parent.eulerAngles = new Vector3(30, 0, 0);
+            this.gameObject.transform.position = new Vector3(0, 22.5f, -40);
+            this.gameObject.transform.eulerAngles = new Vector3(30, 0, 0);
             this.cam.fieldOfView = 15;
             this.cam.backgroundColor = Color.HSVToRGB(120 / 360f, 0.3f, 0.5f);
 
@@ -185,17 +245,9 @@ public class Main : MonoBehaviour
                 i_--;
             }
 
-            this.controller.start();
-
+            this.fieldSize = 10;
             return;
         }
-    }
-
-    private void stageSel()
-    {
-        if (this.player.getHp() < -60 || this.list.Count == 1) this.stage++;
-
-        if (this.stage % 100 < 60) return;
 
         if (this.player.getHp() < -60) this.reset();
         else
@@ -213,7 +265,7 @@ public class Main : MonoBehaviour
             gameObject.transform.localPosition = Vector3.zero;
             gameObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
         }
-        Static.setTexture(ninja.transform, this.texList[i]);
+        Main.setTexture(ninja.transform, this.texList[i]);
         {
             GameObject gameObject = (GameObject)Instantiate(Resources.Load("Sword/Cube"), Vector3.zero, Quaternion.identity);
             gameObject.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
@@ -224,31 +276,28 @@ public class Main : MonoBehaviour
     }
     private void texture()
     {
-        this.texList = new List<Texture>();
+        this.texList = new Texture[9];
 
-        this.texList.Add((Texture)Resources.Load("kai"));
-        this.texList.Add((Texture)Resources.Load("jay"));
-        this.texList.Add((Texture)Resources.Load("zane"));
-        this.texList.Add((Texture)Resources.Load("cole"));
+        this.texList[0] = (Texture)Resources.Load("kai");
+        this.texList[1] = (Texture)Resources.Load("jay");
+        this.texList[2] = (Texture)Resources.Load("zane");
+        this.texList[3] = (Texture)Resources.Load("cole");
 
-        this.texList.Add((Texture)Resources.Load("lloyd"));
-        this.texList.Add((Texture)Resources.Load("nya"));
-        this.texList.Add((Texture)Resources.Load("arin"));
-        this.texList.Add((Texture)Resources.Load("sora"));
+        this.texList[4] = (Texture)Resources.Load("lloyd");
+        this.texList[5] = (Texture)Resources.Load("nya");
+        this.texList[6] = (Texture)Resources.Load("arin");
+        this.texList[7] = (Texture)Resources.Load("sora");
 
-        this.texList.Add((Texture)Resources.Load("lloyd_movie"));
+        this.texList[8] = (Texture)Resources.Load("lloyd_movie");
     }
-}
 
-public static class Static
-{
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 
-    static public void setTexture(Transform transform, Texture texture)
+    static private void setTexture(Transform transform, Texture texture)
     {
         foreach (Transform t in transform)
         {
-            if (t.childCount > 0) Static.setTexture(t, texture);
+            if (t.childCount > 0) Main.setTexture(t, texture);
             MeshRenderer r = t.GetComponent<MeshRenderer>();
             if (r != null) r.material.SetTexture("_MainTex", texture);
         }

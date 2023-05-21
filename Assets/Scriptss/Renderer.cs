@@ -7,6 +7,7 @@ public class Renderer
     Transform[] transform;
     Quaternion[] attack;
     Quaternion walk;
+    bool walkEn; public void setWalkEn(bool s) { this.walkEn = s; }
 
     public Renderer(Ninja n, GameObject g)
     {
@@ -23,6 +24,7 @@ public class Renderer
         this.transform[0].localRotation = this.ninja.getRot();
 
         this.walk = Quaternion.Euler(30, 0, 0);
+        this.walkEn = false;
 
         this.attack = new Quaternion[2] { Quaternion.Euler(90, 0, 90), Quaternion.Euler(180, 0, 0) };
     }
@@ -44,7 +46,7 @@ public class Renderer
         walk();
         void walk()
         {
-            if (this.ninja.getPos() == old) return;
+            if (this.ninja.getPos() == old && !this.walkEn) return;
             float sin = Mathf.Sin(2f * Mathf.PI * (frame + this.ninja.getRandom())) * 0.5f + 0.5f;
             this.transform[1].localRotation = Quaternion.Lerp(this.walk, Quaternion.Inverse(this.walk), sin);
             this.transform[2].localRotation = Quaternion.Lerp(Quaternion.Inverse(this.walk), this.walk, sin);
