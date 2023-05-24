@@ -146,7 +146,8 @@ public class Main : MonoBehaviour
                     this.player.attack.exe();
                     break;
                 case 2:
-                    this.player.special.setI(60);
+                    // this.player.special.setI(60);
+                    this.player.special.exe();
                     break;
                 case 4:
                     this.player.jump(this.controller.getStick().normalized);
@@ -179,6 +180,24 @@ public class Main : MonoBehaviour
         return ret;
     }
 
+    public List<Ninja> getList(Vector3 p, Quaternion r, Vector3 s)
+    {
+        List<Ninja> ret = new List<Ninja>();
+        for (int i = 0; i < this.list.Count; i++)
+        {
+            if (!Main.inCube(this.list[i].getPos(), p, r, s)) continue;
+            ret.Add(this.list[i]);
+        }
+        return ret;
+    }
+
+    private static bool inCube(Vector3 p_, Vector3 p, Quaternion r, Vector3 s)
+    {
+        p_ = Quaternion.Inverse(r) * (p_ - p);
+        p_.Scale(new Vector3(1 / s.x, 1 / s.y, 1 / s.z));
+        return (Mathf.Abs(p_.x) <= 0.5f && Mathf.Abs(p_.y) <= 0.5f && Mathf.Abs(p_.z) <= 0.5f);
+    }
+
     public Ninja nearestNinja(Ninja n)
     {
         Ninja ret = n;
@@ -194,7 +213,6 @@ public class Main : MonoBehaviour
         }
         return ret;
     }
-
     private void charSel()
     {
         Vector2 t = this.controller.getTouchBegan();
