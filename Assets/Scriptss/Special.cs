@@ -17,6 +17,7 @@ public class Special
     {
         if (this.i != 0) return;
         if (this.ninja.getPos().y != 0) return;
+        this.ninja.attack.setI(0);
         this.i = 60;
     }
 

@@ -57,6 +57,7 @@ public class Controller
         {
             Touch t = Input.GetTouch(i);
             if (t.phase != TouchPhase.Ended) continue;
+            if (t.position.x < 0.5f * Screen.width) continue;
             if (t.deltaPosition.sqrMagnitude < Mathf.Pow((Screen.width * 0.01f), 2)) continue;
             this.deltaPosition = t.deltaPosition;
             this.button |= 4;

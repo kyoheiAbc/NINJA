@@ -80,7 +80,8 @@ public class Ninja
     public bool jump(Vector3 v)
     {
         if (pos.y != 0) return false;
-        this.addVec(Vector3.up * 0.3f + v.normalized * 0.5f);
+        this.attack.setI(0);
+        this.addVec(Vector3.up * 0.4f + v.normalized * 0.6f);
         return true;
     }
     public void mv(Vector3 v)
@@ -104,6 +105,7 @@ public class Attack
     }
     public bool exe()
     {
+        if (this.ninja.getPos().y != 0) return false;
         if (this.i % 100 >= 25) return false;
         if (this.i > 300) return false;
         this.i = 100 * (this.i / 100) + 130;

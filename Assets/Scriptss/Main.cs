@@ -54,21 +54,21 @@ public class Main : MonoBehaviour
         this.gameObject.transform.localRotation = Quaternion.identity;
         this.cam.fieldOfView = 1;
         float f = 0;
-        for (int y = 0; y < 2; y++)
+        for (int y = 0; y < 1; y++)
         {
-            for (int x = 0; x < 4; x++)
+            for (int x = 0; x < 6; x++)
             {
                 f++;
-                Ninja n = newNinja(x + 4 * y);
-                n.setPos(new Vector3(100 * (x + 4 * y), 0, 0));
+                Ninja n = newNinja(x + y);
+                n.setPos(new Vector3(100 * (x + y), 0, 0));
                 n.setRot(Quaternion.identity);
                 n.setAi(null);
                 n.renderer.setWalkEn(true);
                 this.list.Add(n);
                 n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = Vector3.zero;
-                n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = -n.getPos() + new Vector3(2 * x, -3 * y, 0);
+                n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = -n.getPos() + new Vector3(2 * x, y, 0);
                 n.renderer.getGameObject().transform.GetChild(0).transform.localRotation = Quaternion.Euler(0, 30, 0);
-                this.gameObject.transform.position += new Vector3(2 * x, -3 * y, 0);
+                this.gameObject.transform.position += new Vector3(2 * x, y, 0);
             }
         }
         this.gameObject.transform.position /= f;
@@ -107,18 +107,10 @@ public class Main : MonoBehaviour
             Vector3 s = this.controller.getStick().normalized;
             this.player.mv(s * 0.1f);
             if (s != Vector3.zero) this.player.setRot(Quaternion.LookRotation(s));
-            switch (this.controller.getButton())
-            {
-                case 1:
-                    this.player.attack.exe();
-                    break;
-                case 2:
-                    this.player.special.exe();
-                    break;
-                case 4:
-                    this.player.jump(this.controller.getDeltaPosition().normalized);
-                    break;
-            }
+            int b = this.controller.getButton();
+            if (b == 1) this.player.attack.exe();
+            if (b == 2) this.player.special.exe();
+            if (b == 4) this.player.jump(this.controller.getDeltaPosition().normalized);
         }
 
         for (int i = 0; i < this.list.Count; i++)
@@ -235,7 +227,7 @@ public class Main : MonoBehaviour
         else
         {
             this.stage = 100 * (this.stage / 100) + 100;
-            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(newNinja(Random.Range(0, 8)));
+            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(newNinja(Random.Range(0, 6)));
         }
     }
     private Ninja newNinja(int i)
@@ -270,10 +262,6 @@ public class Main : MonoBehaviour
 
         this.texList[4] = (Texture)Resources.Load("lloyd");
         this.texList[5] = (Texture)Resources.Load("nya");
-        this.texList[6] = (Texture)Resources.Load("arin");
-        this.texList[7] = (Texture)Resources.Load("sora");
-
-        this.texList[8] = (Texture)Resources.Load("lloyd_movie");
     }
 
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
