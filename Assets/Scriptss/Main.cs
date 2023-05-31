@@ -102,6 +102,7 @@ public class Main : MonoBehaviour
             if (this.player == null) return;
             if (this.cam.fieldOfView == 1) return;
             if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
+            if (this.player.special.getI() != 0) return;
 
             Vector3 s = this.controller.getStick().normalized;
             this.player.mv(s * 0.1f);

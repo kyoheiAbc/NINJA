@@ -86,6 +86,15 @@ public class Renderer
         {
             switch (this.ninja.special.getI())
             {
+                case > 30:
+                    if (this.ninja.getPos().y == 0)
+                    {
+                        this.transform[1].localRotation = Quaternion.Euler(60, 45, 0);
+                        this.transform[2].localRotation = Quaternion.Euler(0, 0, 15);
+                        this.transform[3].localRotation = Quaternion.Euler(60, -45, 0);
+                        this.transform[4].localRotation = Quaternion.Euler(0, 0, -15);
+                    }
+                    break;
                 case 30:
                     this.spin.SetActive(true);
                     break;

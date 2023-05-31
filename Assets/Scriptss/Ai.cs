@@ -20,6 +20,9 @@ public class Ai
 
         if (this.ninja.getHp() < 0 || this.ninja.getStun() > 0) return;
 
+        if (this.ninja.special.getI() != 0) return;
+
+
         if (Main.instance.getFrame() % 30 == (int)(30 * this.ninja.getRandom()))
         {
             // this.target = Main.instance.nearestNinja(this.ninja);
@@ -28,6 +31,17 @@ public class Ai
 
         Vector3 v = this.target.getPos() - this.ninja.getPos();
         v.y = 0;
+
+
+        if (Random.Range(0, 300) == 0)
+        {
+            if (this.ninja.jump(Vector3.zero))
+            {
+                this.ninja.mv(v.normalized * 0.1f);
+                this.ninja.special.exe();
+                return;
+            }
+        }
 
         walk();
         void walk()
@@ -52,7 +66,7 @@ public class Ai
             if (this.atk) return;
             if (this.ninja.attack.getI() != 0) return;
             if (Random.Range(0, 90) != 0) return;
-            if (!this.ninja.jump((this.ninja.getRot() * new Vector3(Random.Range(-1, 2), 0, Random.Range(-1, 2))))) return;
+            if (!this.ninja.jump(Main.forward(this.ninja.getRot() * Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up)))) return;
             this.atk = true;
         }
         if (this.atk && this.ninja.attack.getI() == 0 && this.ninja.getVec().y == 0) this.ninja.attack.exe();
