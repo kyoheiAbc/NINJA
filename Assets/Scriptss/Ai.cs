@@ -28,7 +28,6 @@ public class Ai
 
         Vector3 v = this.target.getPos() - this.ninja.getPos();
         v.y = 0;
-        if (v != Vector3.zero) this.ninja.setRot(Quaternion.LookRotation(v));
 
         walk();
         void walk()
@@ -43,7 +42,7 @@ public class Ai
                 this.walk = 0;
                 return;
             }
-            this.ninja.addPos(v.normalized * 0.1f);
+            this.ninja.mv(v.normalized * 0.1f);
             this.walk--;
         }
 
@@ -58,6 +57,6 @@ public class Ai
         }
         if (this.atk && this.ninja.attack.getI() == 0 && this.ninja.getVec().y == 0) this.ninja.attack.exe();
         if (this.ninja.attack.getI() % 100 == 15) this.atk = this.ninja.attack.exe();
-        if (this.atk) this.ninja.setPos(old + v.normalized * 0.1f);
+        if (this.atk && this.ninja.getPos() == old) this.ninja.mv(v.normalized * 0.1f);
     }
 }

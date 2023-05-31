@@ -23,40 +23,6 @@ public class Main : MonoBehaviour
         Light l = this.gameObject.AddComponent<Light>();
         l.type = LightType.Directional;
 
-        {
-            GameObject canvas = new GameObject();
-            canvas.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-
-            this.button = new RectTransform[4];
-            for (int i = 0; i < this.button.Length; i++)
-            {
-                GameObject g = new GameObject();
-                Image img = g.AddComponent<Image>();
-                g.transform.SetParent(canvas.transform, false);
-                this.button[i] = img.rectTransform;
-            }
-
-            float f = 0.13f * Screen.width;
-            for (int y = 0; y < 2; y++)
-            {
-                for (int x = 0; x < 2; x++)
-                {
-                    this.button[x + 2 * y].position = new Vector2(Screen.width - f, f);
-                    this.button[x + 2 * y].sizeDelta = new Vector2(0.08f * Screen.width, 0.08f * Screen.width);
-                    Color c = Color.HSVToRGB((x + 2 * y) / 6f, 0.5f, 1f);
-                    c = new Color(c.r, c.g, c.b, 0.3f);
-                    this.button[x + 2 * y].GetComponent<Image>().color = c;
-                    this.button[x + 2 * y].GetComponent<Image>().sprite = Resources.Load<Sprite>("circle");
-                }
-            }
-            f = 0.07f * Screen.width;
-            this.button[0].position = (Vector2)this.button[0].position + new Vector2(f, 0);
-            this.button[1].position = (Vector2)this.button[1].position + new Vector2(0, f);
-            this.button[2].position = (Vector2)this.button[2].position - new Vector2(0, f);
-            this.button[3].position = (Vector2)this.button[3].position - new Vector2(f, 0);
-        }
-
-
         this.texture();
 
         Main.instance = this;
@@ -138,7 +104,7 @@ public class Main : MonoBehaviour
             if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
 
             Vector3 s = this.controller.getStick().normalized;
-            this.player.addPos(s * 0.1f);
+            this.player.mv(s * 0.1f);
             if (s != Vector3.zero) this.player.setRot(Quaternion.LookRotation(s));
             switch (this.controller.getButton())
             {
@@ -146,11 +112,10 @@ public class Main : MonoBehaviour
                     this.player.attack.exe();
                     break;
                 case 2:
-                    // this.player.special.setI(60);
                     this.player.special.exe();
                     break;
                 case 4:
-                    this.player.jump(this.controller.getStick().normalized);
+                    this.player.jump(this.controller.getDeltaPosition().normalized);
                     break;
                 case 8:
                     break;
@@ -215,7 +180,7 @@ public class Main : MonoBehaviour
     }
     private void charSel()
     {
-        Vector2 t = this.controller.getTouchBegan();
+        Vector2 t = this.controller.getTouchPhaseBegan();
         if (t != new Vector2(0, 0))
         {
             for (int i = 0; i < this.list.Count; i++)

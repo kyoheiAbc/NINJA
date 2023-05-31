@@ -20,7 +20,6 @@ public class Ninja
     Vector3 vec; public Vector3 getVec() { return this.vec; }
 
     public void addHp(int a) { this.hp += a; }
-    public void addPos(Vector3 a) { this.pos += a; }
     public void addVec(Vector3 a) { this.vec += a; }
 
     public Ninja(GameObject gameObject)
@@ -83,6 +82,12 @@ public class Ninja
         if (pos.y != 0) return false;
         this.addVec(Vector3.up * 0.3f + v.normalized * 0.5f);
         return true;
+    }
+    public void mv(Vector3 v)
+    {
+        if (v == Vector3.zero) return;
+        this.setRot(Quaternion.LookRotation(v));
+        this.pos += v;
     }
 }
 
