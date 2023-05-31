@@ -117,8 +117,6 @@ public class Main : MonoBehaviour
                 case 4:
                     this.player.jump(this.controller.getDeltaPosition().normalized);
                     break;
-                case 8:
-                    break;
             }
         }
 
@@ -250,10 +248,13 @@ public class Main : MonoBehaviour
         }
         Main.setTexture(ninja.transform, this.texList[i]);
         {
-            GameObject gameObject = (GameObject)Instantiate(Resources.Load("Sword/Cube"), Vector3.zero, Quaternion.identity);
-            gameObject.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
-            gameObject.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
-            gameObject.transform.localRotation = Quaternion.Euler(45, 0, 0);
+            GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Main.Destroy(c.GetComponent<Collider>());
+            c.GetComponent<MeshRenderer>().material.color = Color.HSVToRGB(0f, 0f, 0.5f);
+            c.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
+            c.transform.localScale = new Vector3(0.1f, 1.5f, 0.1f);
+            c.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
+            c.transform.localRotation = Quaternion.Euler(45, 0, 0);
         }
         return new Ninja(ninja);
     }

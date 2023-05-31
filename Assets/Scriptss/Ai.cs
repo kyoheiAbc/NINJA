@@ -56,7 +56,7 @@ public class Ai
             this.atk = true;
         }
         if (this.atk && this.ninja.attack.getI() == 0 && this.ninja.getVec().y == 0) this.ninja.attack.exe();
-        if (this.ninja.attack.getI() % 100 == 15) this.atk = this.ninja.attack.exe();
+        if (this.atk && this.ninja.attack.getI() % 100 == 15) this.atk = this.ninja.attack.exe();
         if (this.atk && this.ninja.getPos() == old) this.ninja.mv(v.normalized * 0.1f);
     }
 }

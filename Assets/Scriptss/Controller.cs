@@ -57,10 +57,14 @@ public class Controller
         {
             Touch t = Input.GetTouch(i);
             if (t.phase != TouchPhase.Ended) continue;
-            if (t.deltaPosition.sqrMagnitude < Mathf.Pow((Screen.width * 0.03f), 2)) continue;
+            if (t.deltaPosition.sqrMagnitude < Mathf.Pow((Screen.width * 0.01f), 2)) continue;
             this.deltaPosition = t.deltaPosition;
             this.button |= 4;
             break;
         }
+
+        if (Input.GetKeyDown(KeyCode.Z)) this.button |= 1;
+        if (Input.GetKeyDown(KeyCode.X)) this.button |= 2;
+        if (Input.GetKeyDown(KeyCode.C)) this.button |= 4;
     }
 }

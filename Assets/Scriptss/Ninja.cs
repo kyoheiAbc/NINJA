@@ -30,7 +30,7 @@ public class Ninja
         this.pos = new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10));
         this.random = Random.Range(0, 1f);
         this.renderer = new Renderer(this, gameObject);
-        this.rot = Quaternion.identity;
+        this.rot = Quaternion.identity * Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up);
         this.special = new Special(this);
         this.stun = 0;
         this.vec = Vector3.zero;
