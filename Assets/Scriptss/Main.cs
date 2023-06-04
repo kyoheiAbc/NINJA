@@ -4,16 +4,13 @@ using UnityEngine.UI;
 
 public class Main : MonoBehaviour
 {
-    public RectTransform[] button;
     public Camera cam;
     Controller controller;
-    int fieldSize; public int getFieldSize() { return this.fieldSize; }
     int frame; public int getFrame() { return this.frame / 12; }
     static public Main instance;
     List<Ninja> list;
     Ninja player; public Ninja getPlayer() { return this.player; }
     int stage;
-    Texture[] texList;
 
     void Awake()
     {
@@ -22,8 +19,6 @@ public class Main : MonoBehaviour
 
         Light l = this.gameObject.AddComponent<Light>();
         l.type = LightType.Directional;
-
-        this.texture();
 
         Main.instance = this;
 
@@ -39,8 +34,6 @@ public class Main : MonoBehaviour
 
     private void reset()
     {
-        this.fieldSize = int.MaxValue;
-
         this.frame = 0;
 
         for (int i = 0; i < this.list.Count; i++) Destroy(this.list[i].renderer.getGameObject());
@@ -50,31 +43,20 @@ public class Main : MonoBehaviour
 
         this.stage = 0;
 
-        this.gameObject.transform.position = Vector3.zero;
-        this.gameObject.transform.localRotation = Quaternion.identity;
-        this.cam.fieldOfView = 1;
-        float f = 0;
-        for (int y = 0; y < 1; y++)
+        for (int i = 0; i < 4; i++)
         {
-            for (int x = 0; x < 6; x++)
-            {
-                f++;
-                Ninja n = newNinja(x + y);
-                n.setPos(new Vector3(100 * (x + y), 0, 0));
-                n.setRot(Quaternion.identity);
-                n.setAi(null);
-                n.renderer.setWalkEn(true);
-                this.list.Add(n);
-                n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = Vector3.zero;
-                n.renderer.getGameObject().transform.GetChild(0).transform.localPosition = -n.getPos() + new Vector3(2 * x, y, 0);
-                n.renderer.getGameObject().transform.GetChild(0).transform.localRotation = Quaternion.Euler(0, 30, 0);
-                this.gameObject.transform.position += new Vector3(2 * x, y, 0);
-            }
+            Ninja n = newNinja(i);
+            n.setPos(new Vector3(2 * i, 0, 0));
+            n.setAi(null);
+            this.list.Add(n);
         }
-        this.gameObject.transform.position /= f;
-        this.gameObject.transform.position += new Vector3(0, 1, -400);
-        this.cam.backgroundColor = Color.HSVToRGB(1 / 6f, 0.5f, 0.8f);
 
+        for (int i = 0; i < this.list.Count; i++) this.gameObject.transform.position += new Vector3(this.list[i].getPos().x / this.list.Count, 0, 0);
+        this.gameObject.transform.position = new Vector3(this.gameObject.transform.position.x, 1, -400);
+        this.gameObject.transform.localRotation = Quaternion.identity;
+
+        this.cam.fieldOfView = 1;
+        this.cam.backgroundColor = Color.HSVToRGB(1 / 6f, 0.5f, 0.8f);
     }
 
 
@@ -171,6 +153,9 @@ public class Main : MonoBehaviour
     }
     private void charSel()
     {
+        this.gameObject.transform.position += new Vector3(0.001f, 0, -0.001f);
+        for (int i = 0; i < this.list.Count; i++) this.list[i].mv(new Vector3(0.001f, 0, -0.001f));
+
         Vector2 t = this.controller.getTouchPhaseBegan();
         if (t != new Vector2(0, 0))
         {
@@ -187,7 +172,7 @@ public class Main : MonoBehaviour
         {
             if (this.list[i].attack.getI() != 301) continue;
             this.list[i].addVec(0.75f * Vector3.up);
-            this.player = list[i];
+            this.player = this.list[i];
         }
     }
 
@@ -203,7 +188,6 @@ public class Main : MonoBehaviour
             this.player.renderer.getGameObject().transform.GetChild(0).transform.localRotation = Quaternion.Euler(0, 180, 0);
 
             this.player.setPos(new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10)));
-            this.player.renderer.setWalkEn(false);
             this.player.renderer.update();
 
             this.gameObject.transform.position = new Vector3(0, 22.5f, -40);
@@ -219,7 +203,6 @@ public class Main : MonoBehaviour
                 i_--;
             }
 
-            this.fieldSize = 10;
             return;
         }
 
@@ -227,7 +210,7 @@ public class Main : MonoBehaviour
         else
         {
             this.stage = 100 * (this.stage / 100) + 100;
-            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(newNinja(Random.Range(0, 6)));
+            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(newNinja(Random.Range(0, 4)));
         }
     }
     private Ninja newNinja(int i)
@@ -238,41 +221,43 @@ public class Main : MonoBehaviour
             gameObject.transform.parent = ninja.transform;
             gameObject.transform.localPosition = Vector3.zero;
             gameObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
+
+            GameObject f = new GameObject();
+            f.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("face");
+            f.transform.SetParent(gameObject.transform.GetChild(1).transform, false);
+            f.transform.localScale = new Vector3(6.2f, 6.2f, 0);
+            f.transform.localPosition = new Vector3(0, 0, -0.251f);
+
         }
-        Main.setTexture(ninja.transform, this.texList[i]);
+        Main.setTexture(ninja.transform, (Texture)Resources.Load("ninja"), i);
         {
             GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Main.Destroy(c.GetComponent<Collider>());
-            c.GetComponent<MeshRenderer>().material.color = Color.HSVToRGB(0f, 0f, 0.5f);
+            c.GetComponent<MeshRenderer>().material.color = Color.HSVToRGB(i / 6f, 0.5f, 0.5f);
             c.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
             c.transform.localScale = new Vector3(0.1f, 1.5f, 0.1f);
             c.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
             c.transform.localRotation = Quaternion.Euler(45, 0, 0);
         }
-        return new Ninja(ninja);
+        return new Ninja(i, ninja);
     }
-    private void texture()
-    {
-        this.texList = new Texture[9];
-
-        this.texList[0] = (Texture)Resources.Load("kai");
-        this.texList[1] = (Texture)Resources.Load("jay");
-        this.texList[2] = (Texture)Resources.Load("zane");
-        this.texList[3] = (Texture)Resources.Load("cole");
-
-        this.texList[4] = (Texture)Resources.Load("lloyd");
-        this.texList[5] = (Texture)Resources.Load("nya");
-    }
-
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 
-    static private void setTexture(Transform transform, Texture texture)
+    static private void setTexture(Transform transform, Texture texture, int i)
     {
         foreach (Transform t in transform)
         {
-            if (t.childCount > 0) Main.setTexture(t, texture);
+            if (t.childCount > 0) Main.setTexture(t, texture, i);
             MeshRenderer r = t.GetComponent<MeshRenderer>();
-            if (r != null) r.material.SetTexture("_MainTex", texture);
+            if (r == null) continue;
+            r.material.SetTexture("_MainTex", texture);
+            switch (i)
+            {
+                case 0: r.material.color = Color.HSVToRGB(0, 0.8f, 0.9f); break;
+                case 1: r.material.color = Color.HSVToRGB(2 / 3f, 0.8f, 0.9f); break;
+                case 2: r.material.color = Color.HSVToRGB(0, 0f, 0.15f); break;
+                case 3: r.material.color = Color.HSVToRGB(0, 0f, 0.95f); break;
+            }
         }
     }
 }

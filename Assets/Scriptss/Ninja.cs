@@ -5,6 +5,7 @@ public class Ninja
     Ai ai;
     public void setAi(Ai s) { this.ai = s; }
     public Attack attack;
+    int i; public int getI() { return this.i; }
     int hp; public int getHp() { return this.hp; }
     public void setHp(int s) { this.hp = s; }
     Vector3 pos; public Vector3 getPos() { return this.pos; }
@@ -18,19 +19,21 @@ public class Ninja
     public void setStun(int s) { this.stun = s; }
 
     Vector3 vec; public Vector3 getVec() { return this.vec; }
+    public void setVec(Vector3 s) { this.vec = s; }
 
     public void addHp(int a) { this.hp += a; }
     public void addVec(Vector3 a) { this.vec += a; }
 
-    public Ninja(GameObject gameObject)
+    public Ninja(int i, GameObject gameObject)
     {
         this.ai = new Ai(this);
         this.attack = new Attack(this);
         this.hp = 4;
-        this.pos = new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10));
+        this.i = i;
+        this.pos = Vector3.zero;
         this.random = Random.Range(0, 1f);
         this.renderer = new Renderer(this, gameObject);
-        this.rot = Quaternion.identity * Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up);
+        this.rot = Quaternion.identity;
         this.special = new Special(this);
         this.stun = 0;
         this.vec = Vector3.zero;
@@ -53,21 +56,6 @@ public class Ninja
                 this.pos.y = 0;
                 this.vec.y = 0;
             }
-
-            List<Ninja> l = Main.instance.getList(this, 1, 180);
-            for (int i = 0; i < l.Count; i++)
-            {
-                Vector3 v = l[i].getPos() - this.getPos();
-                v.y = 0;
-                v = v.normalized;
-                if (v == Vector3.zero) v = new Vector3(Random.Range(-1, 2), 0, Random.Range(-1, 2));
-                this.addVec(v * -0.1f);
-                l[i].addVec(v * 0.1f);
-            }
-
-            if (Mathf.Abs(this.pos.x) > Main.instance.getFieldSize()) this.vec += 0.1f * Mathf.Sign(this.pos.x) * Vector3.left;
-            if (Mathf.Abs(this.pos.z) > Main.instance.getFieldSize()) this.vec += 0.1f * Mathf.Sign(this.pos.z) * Vector3.back;
-            if (Mathf.Abs(this.pos.y) > Main.instance.getFieldSize()) this.vec += 0.1f * Vector3.down;
         }
 
         this.attack.update();

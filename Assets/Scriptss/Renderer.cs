@@ -8,24 +8,22 @@ public class Renderer
     Quaternion[] attack;
     Quaternion walk;
     GameObject spin;
-    bool walkEn; public void setWalkEn(bool s) { this.walkEn = s; }
-
     public Renderer(Ninja n, GameObject g)
     {
         this.ninja = n;
+        this.transform = new Transform[7];
         this.gameObject = g;
-        this.transform = new Transform[5];
         this.transform[0] = this.gameObject.transform;
-        for (int i = 0; i < 4; i++)
+
+        for (int i = 0; i < 6; i++)
         {
-            this.transform[i + 1] = this.transform[0].GetChild(0).GetChild(i + 2).gameObject.transform;
+            this.transform[i + 1] = this.transform[0].GetChild(0).GetChild(i).gameObject.transform;
         }
 
         this.transform[0].position = this.ninja.getPos();
         this.transform[0].localRotation = this.ninja.getRot();
 
         this.walk = Quaternion.Euler(30, 0, 0);
-        this.walkEn = false;
 
         this.attack = new Quaternion[2] { Quaternion.Euler(90, 0, 90), Quaternion.Euler(180, 0, 0) };
 
@@ -50,7 +48,7 @@ public class Renderer
         Vector3 old = this.transform[0].position;
 
         this.gameObject.SetActive(true);
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 7; i++)
         {
             this.transform[i].localRotation = Quaternion.identity;
         }
@@ -61,12 +59,12 @@ public class Renderer
         walk();
         void walk()
         {
-            if (this.ninja.getPos() == old && !this.walkEn) return;
+            if (this.ninja.getPos() == old) return;
             float sin = Mathf.Sin(2f * Mathf.PI * (frame + this.ninja.getRandom())) * 0.5f + 0.5f;
-            this.transform[1].localRotation = Quaternion.Lerp(this.walk, Quaternion.Inverse(this.walk), sin);
-            this.transform[2].localRotation = Quaternion.Lerp(Quaternion.Inverse(this.walk), this.walk, sin);
-            this.transform[3].localRotation = Quaternion.Lerp(Quaternion.Inverse(this.walk), this.walk, sin);
-            this.transform[4].localRotation = Quaternion.Lerp(this.walk, Quaternion.Inverse(this.walk), sin);
+            this.transform[3].localRotation = Quaternion.Lerp(this.walk, Quaternion.Inverse(this.walk), sin);
+            this.transform[4].localRotation = Quaternion.Lerp(Quaternion.Inverse(this.walk), this.walk, sin);
+            this.transform[5].localRotation = Quaternion.Lerp(Quaternion.Inverse(this.walk), this.walk, sin);
+            this.transform[6].localRotation = Quaternion.Lerp(this.walk, Quaternion.Inverse(this.walk), sin);
         }
 
         attack();
@@ -78,7 +76,7 @@ public class Renderer
             f = Mathf.Clamp(f, 0, 1);
             float cos = 0.5f - Mathf.Cos(Mathf.PI * f) * 0.5f;
             int c = i / 100;
-            this.transform[3].localRotation = this.attack[1 - c % 2] * Quaternion.AngleAxis(-180 * cos, new Vector3(1 - c % 2, 0, c % 2));
+            this.transform[5].localRotation = this.attack[1 - c % 2] * Quaternion.AngleAxis(-180 * cos, new Vector3(1 - c % 2, 0, c % 2));
         }
 
         special();
@@ -87,7 +85,7 @@ public class Renderer
             switch (this.ninja.special.getI())
             {
                 case > 30:
-                    if (this.ninja.getPos().y == 0) this.transform[3].localRotation = Quaternion.Euler(90, 0, 0);
+                    if (this.ninja.getPos().y == 0) this.transform[5].localRotation = Quaternion.Euler(90, 0, 0);
                     break;
                 case 30:
                     this.spin.SetActive(true);

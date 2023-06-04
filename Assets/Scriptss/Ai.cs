@@ -33,15 +33,6 @@ public class Ai
         v.y = 0;
 
 
-        if (Random.Range(0, 150) == 0)
-        {
-            if (this.ninja.jump(Main.forward(this.ninja.getRot() * Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up))))
-            {
-                this.ninja.mv(v.normalized * 0.1f);
-                this.ninja.special.exe();
-                return;
-            }
-        }
 
         walk();
         void walk()
