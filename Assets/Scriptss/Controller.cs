@@ -4,7 +4,7 @@ public class Controller
     int button; public int getButton() { return this.button; }
     Vector2 deltaPosition; public Vector3 getDeltaPosition() { return new Vector3(this.deltaPosition.x, 0, this.deltaPosition.y); }
     Vector2[] stick; public Vector3 getStick() { return new Vector3(this.stick[1].x, 0, this.stick[1].y); }
-    Vector2 touchPhaseBegan; public Vector2 getTouchPhaseBegan() { return this.touchPhaseBegan; }
+    Vector3 touchPhaseBegan; public Vector3 getTouchPhaseBegan() { return this.touchPhaseBegan; }
 
     public Controller()
     {
@@ -17,7 +17,7 @@ public class Controller
         {
             Touch t = Input.GetTouch(i);
             if (t.phase != TouchPhase.Began) continue;
-            this.touchPhaseBegan = Main.instance.cam.ScreenToWorldPoint(new Vector3(t.position.x, t.position.y, -Main.instance.transform.position.z));
+            this.touchPhaseBegan = t.position;
             break;
         }
 
@@ -28,6 +28,7 @@ public class Controller
             if (t.position.x > 0.5f * Screen.width) continue;
             if (t.phase == TouchPhase.Began) this.stick[0] = t.position;
             this.stick[1] = t.position - this.stick[0];
+            break;
         }
 
         this.button = 0;

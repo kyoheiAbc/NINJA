@@ -24,7 +24,7 @@ public class Ninja
     public void addHp(int a) { this.hp += a; }
     public void addVec(Vector3 a) { this.vec += a; }
 
-    public Ninja(int i, GameObject gameObject)
+    public Ninja(int i)
     {
         this.ai = new Ai(this);
         this.attack = new Attack(this);
@@ -32,11 +32,12 @@ public class Ninja
         this.i = i;
         this.pos = Vector3.zero;
         this.random = Random.Range(0, 1f);
-        this.renderer = new Renderer(this, gameObject);
         this.rot = Quaternion.identity;
         this.special = new Special(this);
         this.stun = 0;
         this.vec = Vector3.zero;
+
+        this.renderer = new Renderer(this);
     }
 
     public void update()

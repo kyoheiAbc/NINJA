@@ -7,12 +7,11 @@ public class Renderer
     Transform[] transform;
     Quaternion[] attack;
     Quaternion walk;
-    GameObject spin;
-    public Renderer(Ninja n, GameObject g)
+    public Renderer(Ninja n)
     {
         this.ninja = n;
         this.transform = new Transform[7];
-        this.gameObject = g;
+        this.gameObject = Renderer.newGameObject(this.ninja.getI());
         this.transform[0] = this.gameObject.transform;
 
         for (int i = 0; i < 6; i++)
@@ -79,30 +78,46 @@ public class Renderer
             this.transform[5].localRotation = this.attack[1 - c % 2] * Quaternion.AngleAxis(-180 * cos, new Vector3(1 - c % 2, 0, c % 2));
         }
 
-        special();
-        void special()
-        {
-            switch (this.ninja.special.getI())
-            {
-                case > 30:
-                    if (this.ninja.getPos().y == 0) this.transform[5].localRotation = Quaternion.Euler(90, 0, 0);
-                    break;
-                case 30:
-                    this.spin.SetActive(true);
-                    break;
-                case > 1:
-                    this.spin.transform.localRotation *= Quaternion.AngleAxis(-30, Vector3.up);
-                    break;
-                default:
-                    this.spin.SetActive(false);
-                    break;
-            }
-        }
-
-
         if (this.ninja.getStun() > 0 || this.ninja.getHp() < 0)
         {
             this.gameObject.SetActive(Mathf.Sin(16 * Mathf.PI * (frame + this.ninja.getRandom())) > 0);
+        }
+    }
+
+    static private GameObject newGameObject(int i)
+    {
+        GameObject ret = new GameObject();
+
+        GameObject g = (GameObject)Main.Instantiate(Resources.Load("human"), Vector3.zero, Quaternion.identity);
+        g.transform.SetParent(ret.transform, false);
+        g.transform.localRotation = Quaternion.Euler(0, 180, 0);
+
+        Renderer.setTexture(g.transform, (Texture)Resources.Load("ninja"), i);
+
+        GameObject f = new GameObject();
+        f.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("face");
+        f.transform.SetParent(g.transform.GetChild(1).transform, false);
+        f.transform.localPosition = new Vector3(0, 0, -0.251f);
+        f.transform.localScale = new Vector3(6.2f, 6.2f, 0);
+
+        return ret;
+    }
+
+    static private void setTexture(Transform transform, Texture texture, int i)
+    {
+        foreach (Transform t in transform)
+        {
+            if (t.childCount > 0) Renderer.setTexture(t, texture, i);
+            MeshRenderer r = t.GetComponent<MeshRenderer>();
+            if (r == null) continue;
+            r.material.SetTexture("_MainTex", texture);
+            switch (i)
+            {
+                case 0: r.material.color = Color.HSVToRGB(0, 0.8f, 0.9f); break;
+                case 1: r.material.color = Color.HSVToRGB(2 / 3f, 0.8f, 0.9f); break;
+                case 2: r.material.color = Color.HSVToRGB(0, 0f, 0.15f); break;
+                case 3: r.material.color = Color.HSVToRGB(0, 0f, 0.95f); break;
+            }
         }
     }
 }

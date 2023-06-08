@@ -4,21 +4,27 @@ using UnityEngine.UI;
 
 public class Main : MonoBehaviour
 {
-    public Camera cam;
+    Camera cam;
     Controller controller;
     int frame; public int getFrame() { return this.frame / 12; }
     static public Main instance;
     List<Ninja> list;
     Ninja player; public Ninja getPlayer() { return this.player; }
     int stage;
-
     void Awake()
     {
+        this.gameObject.transform.position = new Vector3(0, 8, -8 * Mathf.Sqrt(3));
+        this.gameObject.transform.eulerAngles = new Vector3(30, 0, 0);
+
         this.cam = this.gameObject.AddComponent<Camera>();
         this.cam.clearFlags = CameraClearFlags.SolidColor;
+        this.cam.orthographic = true;
+        this.cam.backgroundColor = Color.HSVToRGB(120 / 360f, 0.3f, 0.5f);
 
-        Light l = this.gameObject.AddComponent<Light>();
-        l.type = LightType.Directional;
+        this.gameObject.AddComponent<Light>().type = LightType.Directional;
+
+        this.controller = new Controller();
+        this.list = new List<Ninja>();
 
         Main.instance = this;
 
@@ -27,8 +33,6 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        this.controller = new Controller();
-        this.list = new List<Ninja>();
         this.reset();
     }
 
@@ -45,20 +49,13 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            Ninja n = newNinja(i);
+            Ninja n = new Ninja(i);
             n.setPos(new Vector3(2 * i, 0, 0));
+            n.setRot(Quaternion.identity * Quaternion.AngleAxis(180, new Vector3(0, 1, 0)));
             n.setAi(null);
             this.list.Add(n);
         }
-
-        for (int i = 0; i < this.list.Count; i++) this.gameObject.transform.position += new Vector3(this.list[i].getPos().x / this.list.Count, 0, 0);
-        this.gameObject.transform.position = new Vector3(this.gameObject.transform.position.x, 1, -400);
-        this.gameObject.transform.localRotation = Quaternion.identity;
-
-        this.cam.fieldOfView = 1;
-        this.cam.backgroundColor = Color.HSVToRGB(1 / 6f, 0.5f, 0.8f);
     }
-
 
     void Update()
     {
@@ -81,17 +78,28 @@ public class Main : MonoBehaviour
         void control()
         {
             this.controller.update();
-            if (this.player == null) return;
-            if (this.cam.fieldOfView == 1) return;
+
+            if (this.player == null)
+            {
+                Vector3 gtpb = this.cam.ScreenToWorldPoint(this.controller.getTouchPhaseBegan());
+                if (gtpb == Vector3.zero) return;
+                Quaternion r = Quaternion.Euler(30, 0, 0);
+                for (int i = 0; i < this.list.Count; i++)
+                {
+                    if (Main.DoesLineIntersectSphere(gtpb, gtpb + Main.forward(r).normalized * 50, this.list[i].getPos() + Vector3.up, 0.499f))
+                    {
+                        Debug.Log(this.list[i].getPos());
+                        break;
+                    }
+                }
+                return;
+            }
             if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
-            if (this.player.special.getI() != 0) return;
 
             Vector3 s = this.controller.getStick().normalized;
             this.player.mv(s * 0.1f);
-            if (s != Vector3.zero) this.player.setRot(Quaternion.LookRotation(s));
             int b = this.controller.getButton();
             if (b == 1) this.player.attack.exe();
-            if (b == 2) this.player.special.exe();
             if (b == 4) this.player.jump(this.controller.getDeltaPosition().normalized);
         }
 
@@ -100,8 +108,6 @@ public class Main : MonoBehaviour
             this.list[i].renderer.update();
         }
 
-        if (this.player == null) this.charSel();
-        else stageSel();
     }
 
 
@@ -151,113 +157,24 @@ public class Main : MonoBehaviour
         }
         return ret;
     }
-    private void charSel()
+    private static bool DoesLineIntersectSphere(Vector3 lineStart, Vector3 lineEnd, Vector3 sphereCenter, float sphereRadius)
     {
-        this.gameObject.transform.position += new Vector3(0.001f, 0, -0.001f);
-        for (int i = 0; i < this.list.Count; i++) this.list[i].mv(new Vector3(0.001f, 0, -0.001f));
-
-        Vector2 t = this.controller.getTouchPhaseBegan();
-        if (t != new Vector2(0, 0))
-        {
-            for (int i = 0; i < this.list.Count; i++)
-            {
-                Vector2 n = (Vector2)this.list[i].renderer.getGameObject().transform.GetChild(0).transform.position + new Vector2(0, 1);
-                if ((t - n).sqrMagnitude > 0.75f * 0.75f) continue;
-                this.list[i].attack.exe();
-                break;
-            }
-        }
-
-        for (int i = 0; i < this.list.Count; i++)
-        {
-            if (this.list[i].attack.getI() != 301) continue;
-            this.list[i].addVec(0.75f * Vector3.up);
-            this.player = this.list[i];
-        }
+        Vector3 closestPoint = ClosestPointOnLine(lineStart, lineEnd, sphereCenter);
+        return (closestPoint - sphereCenter).sqrMagnitude < sphereRadius * sphereRadius;
     }
 
-    private void stageSel()
+    private static Vector3 ClosestPointOnLine(Vector3 lineStart, Vector3 lineEnd, Vector3 point)
     {
-        if (this.cam.fieldOfView == 1 || this.player.getHp() < -60 || this.list.Count == 1) this.stage++;
+        Vector3 lineDirection = lineEnd - lineStart;
+        float lineLength = lineDirection.magnitude;
+        lineDirection.Normalize();
 
-        if (this.stage % 100 < 30) return;
+        float projectMagnitude = Vector3.Dot(point - lineStart, lineDirection);
+        projectMagnitude = Mathf.Clamp(projectMagnitude, 0f, lineLength);
 
-        if (this.cam.fieldOfView == 1)
-        {
-            this.player.renderer.getGameObject().transform.GetChild(0).transform.localPosition = Vector3.zero;
-            this.player.renderer.getGameObject().transform.GetChild(0).transform.localRotation = Quaternion.Euler(0, 180, 0);
-
-            this.player.setPos(new Vector3(Random.Range(-10, 10), 10, Random.Range(-10, 10)));
-            this.player.renderer.update();
-
-            this.gameObject.transform.position = new Vector3(0, 22.5f, -40);
-            this.gameObject.transform.eulerAngles = new Vector3(30, 0, 0);
-            this.cam.fieldOfView = 15;
-            this.cam.backgroundColor = Color.HSVToRGB(120 / 360f, 0.3f, 0.5f);
-
-            for (int i_ = 0; i_ < this.list.Count; i_++)
-            {
-                if (this.list[i_] == this.player) continue;
-                Destroy(this.list[i_].renderer.getGameObject());
-                this.list.RemoveAt(i_);
-                i_--;
-            }
-
-            return;
-        }
-
-        if (this.player.getHp() < -60) this.reset();
-        else
-        {
-            this.stage = 100 * (this.stage / 100) + 100;
-            for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(newNinja(Random.Range(0, 4)));
-        }
+        Vector3 closestPoint = lineStart + lineDirection * projectMagnitude;
+        return closestPoint;
     }
-    private Ninja newNinja(int i)
-    {
-        GameObject ninja = new GameObject();
-        {
-            GameObject gameObject = (GameObject)Instantiate(Resources.Load("human"), Vector3.zero, Quaternion.identity);
-            gameObject.transform.parent = ninja.transform;
-            gameObject.transform.localPosition = Vector3.zero;
-            gameObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
 
-            GameObject f = new GameObject();
-            f.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("face");
-            f.transform.SetParent(gameObject.transform.GetChild(1).transform, false);
-            f.transform.localScale = new Vector3(6.2f, 6.2f, 0);
-            f.transform.localPosition = new Vector3(0, 0, -0.251f);
-
-        }
-        Main.setTexture(ninja.transform, (Texture)Resources.Load("ninja"), i);
-        {
-            GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Main.Destroy(c.GetComponent<Collider>());
-            c.GetComponent<MeshRenderer>().material.color = Color.HSVToRGB(i / 6f, 0.5f, 0.5f);
-            c.transform.parent = ninja.transform.GetChild(0).GetChild(4).transform;
-            c.transform.localScale = new Vector3(0.1f, 1.5f, 0.1f);
-            c.transform.localPosition = new Vector3(-0.05f, -0.8f, -0.25f);
-            c.transform.localRotation = Quaternion.Euler(45, 0, 0);
-        }
-        return new Ninja(i, ninja);
-    }
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
-
-    static private void setTexture(Transform transform, Texture texture, int i)
-    {
-        foreach (Transform t in transform)
-        {
-            if (t.childCount > 0) Main.setTexture(t, texture, i);
-            MeshRenderer r = t.GetComponent<MeshRenderer>();
-            if (r == null) continue;
-            r.material.SetTexture("_MainTex", texture);
-            switch (i)
-            {
-                case 0: r.material.color = Color.HSVToRGB(0, 0.8f, 0.9f); break;
-                case 1: r.material.color = Color.HSVToRGB(2 / 3f, 0.8f, 0.9f); break;
-                case 2: r.material.color = Color.HSVToRGB(0, 0f, 0.15f); break;
-                case 3: r.material.color = Color.HSVToRGB(0, 0f, 0.95f); break;
-            }
-        }
-    }
 }
