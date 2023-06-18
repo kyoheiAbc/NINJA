@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Main : MonoBehaviour
 {
-    Camera cam;
     Controller controller;
-    int frame; public int getFrame() { return this.frame / 12; }
+    int frame; public int getFrame() { return this.frame; }
     static public Main instance;
     List<Ninja> list;
     Ninja player; public Ninja getPlayer() { return this.player; }
@@ -16,10 +14,10 @@ public class Main : MonoBehaviour
         this.gameObject.transform.position = new Vector3(0, 8, -8 * Mathf.Sqrt(3));
         this.gameObject.transform.eulerAngles = new Vector3(30, 0, 0);
 
-        this.cam = this.gameObject.AddComponent<Camera>();
-        this.cam.clearFlags = CameraClearFlags.SolidColor;
-        this.cam.orthographic = true;
-        this.cam.backgroundColor = Color.HSVToRGB(120 / 360f, 0.3f, 0.5f);
+        Camera camera = this.gameObject.AddComponent<Camera>();
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.orthographic = true;
+        camera.backgroundColor = Color.HSVToRGB(120 / 360f, 0.3f, 0.5f);
 
         this.gameObject.AddComponent<Light>().type = LightType.Directional;
 
@@ -59,8 +57,8 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        this.frame += 12;
-        if (this.frame == 12 * 60 * 3) this.frame = 0;
+        this.frame++;
+        if (this.frame == 30 * 60) this.frame = 0;
 
         for (int i = 0; i < this.list.Count; i++)
         {
@@ -81,20 +79,25 @@ public class Main : MonoBehaviour
 
             if (this.player == null)
             {
-                Vector3 gtpb = this.cam.ScreenToWorldPoint(this.controller.getTouchPhaseBegan());
+                Vector3 gtpb = this.transform.GetComponent<Camera>().ScreenToWorldPoint(this.controller.getTouchPhaseBegan());
                 if (gtpb == Vector3.zero) return;
-                Quaternion r = Quaternion.Euler(30, 0, 0);
                 for (int i = 0; i < this.list.Count; i++)
                 {
-                    if (Main.DoesLineIntersectSphere(gtpb, gtpb + Main.forward(r).normalized * 50, this.list[i].getPos() + Vector3.up, 0.499f))
+                    if (Main.inSphere(gtpb, gtpb + Main.forward(Quaternion.Euler(30, 0, 0)).normalized * 256, this.list[i].getPos() + Vector3.up, 0.499f))
                     {
-                        Debug.Log(this.list[i].getPos());
+                        this.player = this.list[i];
+                        for (int i_ = 0; i_ < this.list.Count; i_++)
+                        {
+                            if (this.player == this.list[i_]) continue;
+                            Destroy(this.list[i_].renderer.getGameObject());
+                            this.list.RemoveAt(i_);
+                            i_--;
+                        }
                         break;
                     }
                 }
                 return;
             }
-            if (this.player.getHp() < 0 || this.player.getStun() > 0) return;
 
             Vector3 s = this.controller.getStick().normalized;
             this.player.mv(s * 0.1f);
@@ -108,6 +111,20 @@ public class Main : MonoBehaviour
             this.list[i].renderer.update();
         }
 
+        next();
+        void next()
+        {
+            if (this.player == null) return;
+            if (this.player.getHp() < -60 || this.list.Count == 1) this.stage++;
+            if (this.stage % 100 < 30) return;
+
+            if (this.player.getHp() < -60) this.reset();
+            else
+            {
+                this.stage = 100 * (this.stage / 100) + 100;
+                for (int i = 0; i < Mathf.Pow(2, this.stage / 100 - 1); i++) this.list.Add(new Ninja(Random.Range(0, 4)));
+            }
+        }
     }
 
 
@@ -157,24 +174,17 @@ public class Main : MonoBehaviour
         }
         return ret;
     }
-    private static bool DoesLineIntersectSphere(Vector3 lineStart, Vector3 lineEnd, Vector3 sphereCenter, float sphereRadius)
+    private static bool inSphere(Vector3 lineA, Vector3 lineB, Vector3 p, float r)
     {
-        Vector3 closestPoint = ClosestPointOnLine(lineStart, lineEnd, sphereCenter);
-        return (closestPoint - sphereCenter).sqrMagnitude < sphereRadius * sphereRadius;
+        return (nearestPoint(lineA, lineB, p) - p).sqrMagnitude < r * r;
     }
 
-    private static Vector3 ClosestPointOnLine(Vector3 lineStart, Vector3 lineEnd, Vector3 point)
+    private static Vector3 nearestPoint(Vector3 lineA, Vector3 lineB, Vector3 p)
     {
-        Vector3 lineDirection = lineEnd - lineStart;
-        float lineLength = lineDirection.magnitude;
-        lineDirection.Normalize();
-
-        float projectMagnitude = Vector3.Dot(point - lineStart, lineDirection);
-        projectMagnitude = Mathf.Clamp(projectMagnitude, 0f, lineLength);
-
-        Vector3 closestPoint = lineStart + lineDirection * projectMagnitude;
-        return closestPoint;
+        Vector3 v = lineB - lineA;
+        return lineA + v * Mathf.Clamp01(Vector3.Dot(p - lineA, v) / v.sqrMagnitude);
     }
+
 
     static public Vector3 forward(Quaternion q) { return (q * Vector3.forward).normalized; }
 }

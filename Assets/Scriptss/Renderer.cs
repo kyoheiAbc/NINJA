@@ -26,18 +26,7 @@ public class Renderer
 
         this.attack = new Quaternion[2] { Quaternion.Euler(90, 0, 90), Quaternion.Euler(180, 0, 0) };
 
-        this.spin = new GameObject();
-        this.spin.transform.SetParent(this.gameObject.transform, false);
-        for (int i = 0; i < 3; i++)
-        {
-            GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Main.Destroy(c.GetComponent<Collider>());
-            c.transform.localScale = new Vector3(2 - 0.5f * i, 0.25f, 2 - 0.5f * i);
-            c.GetComponent<MeshRenderer>().material.color = Color.HSVToRGB(60 / 360f, 0.8f, 0.8f);
-            c.transform.SetParent(this.spin.transform);
-            c.transform.localPosition = new Vector3(0, 1.4f - 0.6f * i, 0);
-            if (i == 1) c.transform.localRotation *= Quaternion.AngleAxis(45, Vector3.up);
-        }
+
     }
 
 
