@@ -14,7 +14,6 @@ public class Ninja
     public Renderer renderer;
     Quaternion rot; public Quaternion getRot() { return this.rot; }
     public void setRot(Quaternion s) { this.rot = s; }
-    public Special special;
     int stun; public int getStun() { return this.stun; }
     public void setStun(int s) { this.stun = s; }
 
@@ -33,7 +32,6 @@ public class Ninja
         this.pos = Vector3.zero;
         this.random = Random.Range(0, 1f);
         this.rot = Quaternion.identity;
-        this.special = new Special(this);
         this.stun = 0;
         this.vec = Vector3.zero;
 
@@ -61,7 +59,6 @@ public class Ninja
 
         this.attack.update();
 
-        this.special.update();
 
         if (this.ai != null) this.ai.update();
     }

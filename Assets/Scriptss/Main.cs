@@ -80,6 +80,7 @@ public class Main : MonoBehaviour
             if (this.player == null)
             {
                 Vector3 gtpb = this.transform.GetComponent<Camera>().ScreenToWorldPoint(this.controller.getTouchPhaseBegan());
+
                 if (gtpb == Vector3.zero) return;
                 for (int i = 0; i < this.list.Count; i++)
                 {

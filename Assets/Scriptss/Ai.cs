@@ -20,8 +20,6 @@ public class Ai
 
         if (this.ninja.getHp() < 0 || this.ninja.getStun() > 0) return;
 
-        if (this.ninja.special.getI() != 0) return;
-
 
         if (Main.instance.getFrame() % 30 == (int)(30 * this.ninja.getRandom()))
         {
